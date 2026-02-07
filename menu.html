@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Principal - OFAS-CSF</title>
+    <style>
+        /* --- ESTILOS BASE --- */
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #000080 100%);
+            height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            width: 100%; height: 70px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            display: flex; justify-content: flex-end; align-items: center;
+            padding: 0 30px; box-sizing: border-box;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 100;
+        }
+
+        .user-menu {
+            position: relative; display: flex; align-items: center;
+            cursor: pointer; color: white; font-weight: bold;
+            padding: 5px 15px; border-radius: 30px; transition: 0.3s;
+        }
+        .user-menu:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .user-avatar {
+            width: 45px; height: 45px; border-radius: 50%;
+            object-fit: cover; margin-left: 12px;
+            border: 2px solid #00d4ff; background: #eee;
+        }
+
+        /* --- DROPDOWN --- */
+        .dropdown {
+            position: absolute; top: 60px; right: 0;
+            background: white; width: 230px; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: none; flex-direction: column; overflow: hidden;
+            z-index: 101;
+        }
+        .dropdown.show { display: flex; }
+        .dropdown a, .dropdown label {
+            padding: 12px 20px; color: #333; text-decoration: none;
+            font-size: 0.95rem; display: flex; align-items: center; transition: 0.2s; cursor: pointer;
+        }
+        .dropdown a:hover { background: #f0f8ff; color: #000080; }
+
+        /* --- ÁREA DE POST-ITS --- */
+        #postits-area {
+            position: fixed;
+            top: 80px; left: 20px;
+            display: flex; flex-wrap: wrap;
+            gap: 15px;
+            width: calc(100% - 40px);
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .postit-card {
+            pointer-events: auto;
+            width: 200px; height: 210px; padding: 15px;
+            border-radius: 0 0 30px 0;
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.3);
+            position: relative;
+            transition: all 0.4s ease;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        .postit-card.minimized { height: 35px; width: 170px; padding: 8px 12px; }
+
+        .color-verde { background: #a7ff9d; }
+        .color-amarillo { background: #fef68c; }
+        .color-rojo { background: #ffadad; }
+
+        .postit-text {
+            width: 100%; height: 100%; background: transparent;
+            border: none; resize: none; font-family: 'Segoe Print', cursive;
+            font-size: 0.85rem; outline: none; color: #333;
+        }
+        
+        .last-mod {
+            font-size: 0.65rem; color: rgba(0,0,0,0.4);
+            margin-top: 5px; text-align: right; font-style: italic;
+        }
+
+        .min-title {
+            display: none; font-size: 0.75rem; font-weight: bold; color: #444;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 75%;
+        }
+
+        .minimized .min-title { display: block; }
+        .minimized .postit-text, .minimized .last-mod { display: none; }
+
+        .postit-controls {
+            position: absolute; top: 5px; right: 8px;
+            display: flex; gap: 6px; z-index: 5;
+        }
+
+        .control-btn { cursor: pointer; font-size: 0.9rem; opacity: 0.5; transition: 0.2s; }
+        .control-btn:hover { opacity: 1; transform: scale(1.2); }
+
+        /* --- BOTÓN FLOTANTE Y CRÉDITOS --- */
+        #scroll-btn {
+            position: fixed; bottom: 45px; right: 30px;
+            width: 50px; height: 50px;
+            background-color: #00d4ff; color: white;
+            border: none; border-radius: 50%;
+            cursor: pointer; font-size: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000; display: flex; align-items: center; justify-content: center;
+            animation: pulseGlow 2s infinite; transition: 0.3s;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 212, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); }
+        }
+
+        .footer-brand {
+            position: fixed; bottom: 12px; width: 100%;
+            text-align: center; color: rgba(255,255,255,0.8);
+            font-size: 0.85rem; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* --- MENU CARD --- */
+        .main-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
+        .menu-card {
+            background: rgba(245, 245, 245, 0.95); padding: 40px; border-radius: 25px;
+            width: 90%; max-width: 480px; text-align: center;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.5); z-index: 10;
+        }
+        .grid-menu { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 20px; }
+        .btn-option {
+            background-color: white; color: #000080; padding: 14px;
+            border: 2px solid #000080; border-radius: 12px;
+            text-decoration: none; font-weight: bold; display: flex; align-items: center; justify-content: center;
+            transition: 0.3s;
+        }
+        .btn-option:hover { background-color: #00d4ff; color: white; border-color: #00d4ff; transform: translateY(-3px); }
+
+        .hoja {
+            position: absolute; background: rgba(255,255,255,0.15);
+            width: 10px; height: 15px; pointer-events: none;
+            animation: caer linear infinite;
+        }
+        @keyframes caer {
+            0% { transform: translateY(-10vh) rotate(0); opacity: 0; }
+            100% { transform: translateY(110vh) rotate(720deg) translateX(50px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="user-menu" onclick="toggleDropdown()">
+            <span id="nav-username">Cargando...</span>
+            <img src="https://via.placeholder.com/150" alt="Perfil" class="user-avatar" id="avatar-img">
+            
+            <div class="dropdown" id="userDropdown">
+                <label for="fileInput">📷 Cambiar Foto de Perfil</label>
+                <input type="file" id="fileInput" accept="image/*" onchange="previewFile()" style="display:none;">
+                <div style="height:1px; background:#eee;"></div>
+                <a href="javascript:void(0)" onclick="addPostit()">📌 Nuevo Post-it</a>
+                <a href="configurar.html">⚙️ Configuración</a>
+                <a href="index.html" style="color: #c0392b;">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="postits-area"></div>
+
+    <div class="main-container">
+        <div class="menu-card">
+            <div style="font-size: 50px; margin-bottom: 5px;">📄</div>
+            <h2>Gestión de Correspondencias</h2>
+            <p>OFAS - CSF</p>
+            <div class="grid-menu">
+                <a href="registrar.html" class="btn-option"><span>➕</span> Registrar Documento</a>
+                <a href="consultar.html" class="btn-option"><span>🔍</span> Consultar Registro</a>
+                <a href="modificar.html" class="btn-option"><span>✏️</span> Modificar Registro</a>
+                <a href="eliminar.html" class="btn-option"><span>🗑️</span> Eliminar Registro</a>                
+                <a href="csfcrear.html" class="btn-option" style="background-color: #000080; color: white;"><span>⭐</span> Crear CSF</a>
+            </div>
+        </div>
+    </div>
+
+    <button id="scroll-btn" onclick="handleScroll()">▲</button>
+
+    <div class="footer-brand">
+        <strong>⚙️YEPRI-INN</strong> Sistema de Gestión y Consulta de Datos.
+    </div>
+
+    <script>
+        let notes = [];
+        let currentUser = "";
+        let scrollUp = true;
+
+        window.onload = function() {
+            const historial = JSON.parse(localStorage.getItem('historial_ofas')) || [];
+            if(historial.length > 0) {
+                currentUser = historial[0].nombre;
+                document.getElementById('nav-username').innerText = currentUser;
+            } else {
+                window.location.href = "index.html";
+                return;
+            }
+
+            const savedAvatar = localStorage.getItem('avatar_' + currentUser);
+            if(savedAvatar) document.getElementById('avatar-img').src = savedAvatar;
+
+            notes = JSON.parse(localStorage.getItem('notes_' + currentUser)) || [];
+            renderNotes();
+        };
+
+        function saveNotes() {
+            localStorage.setItem('notes_' + currentUser, JSON.stringify(notes));
+        }
+
+        function previewFile() {
+            const file = document.getElementById('fileInput').files[0];
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const imageData = reader.result;
+                document.getElementById('avatar-img').src = imageData;
+                localStorage.setItem('avatar_' + currentUser, imageData);
+            }
+            if (file) reader.readAsDataURL(file);
+        }
+
+        function addPostit() {
+            const colors = ['verde', 'amarillo', 'rojo'];
+            const now = new Date();
+            const timestamp = now.toLocaleDateString() + ' ' + now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+            const newNote = { 
+                id: Date.now(), 
+                text: '', 
+                color: colors[Math.floor(Math.random() * colors.length)],
+                minimized: false,
+                modified: timestamp 
+            };
+            notes.push(newNote);
+            saveNotes();
+            renderNotes();
+        }
+
+        function updateNoteText(id, text) {
+            const note = notes.find(n => n.id === id);
+            if(note) {
+                const now = new Date();
+                note.text = text;
+                note.modified = now.toLocaleDateString() + ' ' + now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+                saveNotes();
+                // Actualizamos solo el texto de la modificación sin renderizar todo para evitar parpadeo
+                document.getElementById(`mod-${id}`).innerText = "Editado: " + note.modified;
+            }
+        }
+
+        function toggleMinimize(id) {
+            const note = notes.find(n => n.id === id);
+            if(note) { note.minimized = !note.minimized; saveNotes(); renderNotes(); }
+        }
+
+        function changeNoteColor(id) {
+            const colors = ['verde', 'amarillo', 'rojo'];
+            const note = notes.find(n => n.id === id);
+            if(note) {
+                let cur = colors.indexOf(note.color);
+                note.color = colors[(cur + 1) % colors.length];
+                saveNotes(); renderNotes();
+            }
+        }
+
+        function deleteNote(id) {
+            notes = notes.filter(n => n.id !== id);
+            saveNotes(); renderNotes();
+        }
+
+        function renderNotes() {
+            const area = document.getElementById('postits-area');
+            area.innerHTML = '';
+            notes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = `postit-card color-${note.color} ${note.minimized ? 'minimized' : ''}`;
+                const title = note.text.split('\n')[0].trim() || "Nueva Nota";
+
+                card.innerHTML = `
+                    <div class="min-title">${title}</div>
+                    <div class="postit-controls">
+                        <span class="control-btn" onclick="toggleMinimize(${note.id})">${note.minimized ? '□' : '–'}</span>
+                        <span class="control-btn" onclick="changeNoteColor(${note.id})">🎨</span>
+                        <span class="control-btn" onclick="deleteNote(${note.id})">✖</span>
+                    </div>
+                    <textarea class="postit-text" placeholder="Escribe..." oninput="updateNoteText(${note.id}, this.value)">${note.text}</textarea>
+                    <div class="last-mod" id="mod-${note.id}">Editado: ${note.modified}</div>
+                `;
+                area.appendChild(card);
+            });
+        }
+
+        function handleScroll() {
+            const btn = document.getElementById('scroll-btn');
+            window.scrollTo({ top: scrollUp ? 0 : document.body.scrollHeight, behavior: 'smooth' });
+            btn.innerText = scrollUp ? "▼" : "▲";
+            scrollUp = !scrollUp;
+        }
+
+        function toggleDropdown() { document.getElementById('userDropdown').classList.toggle('show'); }
+        window.onclick = (e) => { if (!e.target.closest('.user-menu')) document.getElementById('userDropdown').classList.remove('show'); }
+
+        setInterval(() => {
+            const hoja = document.createElement('div');
+            hoja.className = 'hoja';
+            hoja.style.left = Math.random() * 100 + "vw";
+            hoja.style.animationDuration = (Math.random() * 3 + 5) + "s";
+            document.body.appendChild(hoja);
+            setTimeout(() => hoja.remove(), 8000);
+        }, 1500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editor Inteligente CSF | METAX</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <style>
+        :root {
+            --brand: #002e5d;
+            --accent: #00d4ff;
+            --success: #2ec4b6;
+            --docs-bg: #f8f9fa;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--docs-bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* PANEL LATERAL */
+        .sidebar { width: 420px; background: white; box-shadow: 4px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; z-index: 100; }
+        .sidebar-header { padding: 20px; background: var(--brand); color: white; text-align: center; }
+        .sidebar-content { padding: 20px; overflow-y: auto; flex: 1; }
+
+        /* ETIQUETAS */
+        .tag-group { margin-bottom: 20px; }
+        .tag-group h4 { font-size: 0.7rem; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .tag-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+        .info-tag { 
+            background: #eef2ff; border: 1px solid #c7d2fe; padding: 8px 12px; border-radius: 6px; 
+            font-size: 0.75rem; cursor: pointer; font-weight: 600; color: #3730a3;
+            white-space: normal !important; text-align: left; width: 100%; /* Texto completo */
+        }
+        .info-tag:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+        /* ÁREA DE TRABAJO ESTILO GOOGLE DOCS */
+        .workspace { flex: 1; background: #525659; overflow-y: auto; display: flex; justify-content: center; padding: 40px; }
+        
+        .google-sheet {
+            width: 21.59cm; min-height: 27.94cm; background: white;
+            padding: 3.5cm 2.5cm 2cm 3cm; box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); position: relative;
+            outline: none; color: #000; font-size: 11pt; line-height: 1.5; text-align: justify;
+        }
+
+        /* DISEÑO INSTITUCIONAL */
+        .logo-gob { position: absolute; top: 0.8cm; left: 1cm; width: 5.5cm; pointer-events: none; }
+        .header-labels { position: absolute; top: 3.5cm; left: 3cm; font-size: 8.5pt; font-weight: bold; color: #444; }
+        .folio-box { position: absolute; top: 3.5cm; right: 2.5cm; text-align: right; }
+        .pie-pagina { position: absolute; bottom: 1cm; left: 3cm; right: 2.5cm; border-top: 1px solid var(--accent); font-size: 7.5pt; padding-top: 5px; color: #555; }
+
+        .btn-main { background: var(--brand); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn-word { background: #2b579a; }
+        .btn-gdocs { background: #4285f4; }
+
+        /* INDICADOR AUTO-GUARDADO */
+        #save-indicator { position: fixed; bottom: 20px; right: 20px; background: var(--success); color: white; padding: 8px 15px; border-radius: 20px; font-size: 0.7rem; display: none; z-index: 1000; }
+
+        @media print { .sidebar { display: none; } .workspace { background: white; padding: 0; } .google-sheet { box-shadow: none; margin: 0; } }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-header"><h3 style="margin:0">Editor CSF Institucional</h3></div>
+    <div class="sidebar-content">
+        <label style="font-size: 11px; font-weight: 800; color: #666;">1. SELECCIONAR REGISTRO</label>
+        <select id="sel-ofa" style="width:100%; padding:10px; margin: 10px 0;" onchange="actualizarInterfaz()"><option>Cargando...</option></select>
+
+        <div class="tag-group">
+            <h4>Datos de la Tabla (Sustituir selección)</h4>
+            <div class="tag-grid" id="tag-box"></div>
+        </div>
+
+        <label style="font-size: 11px; font-weight: 800; color: #666;">2. TIPO DE OFICIO</label>
+        <select id="sel-tipo" style="width:100%; padding:10px; margin: 10px 0;" onchange="cambiarPlantilla()">
+            <option value="solicitud">Formato 1: Oficio de Solicitud</option>
+            <option value="respuesta">Formato 2: Oficio de Respuesta</option>
+        </select>
+
+        <button class="btn-main btn-gdocs" onclick="exportarAGoogleDocs()">🚀 Exportar a Google Docs</button>
+        <button class="btn-main btn-word" onclick="exportarWord()">📝 Descargar para Word (.doc)</button>
+        <button class="btn-main" onclick="window.print()">🖨️ Imprimir Directo</button>
+        <button onclick="location.href='menu.html'" style="background:none; border:none; color:gray; cursor:pointer; font-size:0.8rem; margin-top:15px; width:100%">← Volver al Menú</button>
+    </div>
+</aside>
+
+<main class="workspace">
+    <div class="google-sheet" id="sheet-editor" contenteditable="true">
+        <img src="https://i.imgur.com/YhHjNfJ.png" class="logo-gob" contenteditable="false">
+        
+        <div class="header-labels" contenteditable="false">
+            Subsecretaría de Finanzas e Inversión<br>
+            Coordinación de Seguimiento a la Fiscalización
+        </div>
+
+        <div class="folio-box" contenteditable="false">
+            <b>Oficio No. <span id="v-folio">CSF/0000/2026</span></b><br>
+            <b>Asunto: <span id="v-asunto">SE NOTIFICA</span></b><br>
+            Guanajuato, Gto. <span id="v-fecha">_ de _ del 2026</span>
+        </div>
+
+        <div id="cuerpo-editable" style="margin-top: 3.5cm; text-align: justify;">
+            Seleccione un folio para cargar la plantilla institucional...
+        </div>
+
+        <div class="atentamente" style="margin-top: 2cm;" contenteditable="false">
+            Atentamente,<br><br><br>
+            <b id="v-firmante">Lcda. Leticia Noemí Escamilla Chávez.</b><br>
+            <span>Coordinadora de Seguimiento a la Fiscalización.</span>
+            <div style="font-size: 7pt; color: #777;">Lcda. LNEC / Lic. JMYP / C.P. MRMG.</div>
+        </div>
+
+        <div class="pie-pagina" contenteditable="false">
+            Paseo de la Presa 172 Guanajuato, Gto. C.P. 36000 | Tel. (473) 735 1500 | finanzas.guanajuato.gob.mx
+        </div>
+    </div>
+</main>
+
+<div id="save-indicator">✔️ Borrador guardado automáticamente</div>
+
+<script>
+const SUPABASE_URL = "https://ltxluqwvspkwnzodgwim.supabase.co";
+const SUPABASE_KEY = "sb_publishable_5wz8G2GjcNf9f3dzkgR5dw_V1gHycyU";
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// CORRECCIÓN: Uso de backticks para evitar SyntaxError y carga de oficio por default
+const TEXTOS = {
+    solicitud: `Se hace de su conocimiento la recepción del oficio de referencia <b>[oficio_emisor]</b>, mediante el cual la Auditoría Superior del Estado de Guanajuato (ASEG) remite el Pliego de Observaciones y Recomendaciones derivado de la Auditoría Financiera y de Desempeño a la empresa Guanajuato Leasing Services, S.A.P.I. de C.V., SOFOM ENR., respecto a los ejercicios 2021, 2022, 2023 2024 y concomitante 2025. El citado instrumento, notificado mediante firma electrónica a la C. Gobernadora Constitucional, se adjunta al presente para los efectos legales y administrativos conducentes.<br><br>A fin de dar cumplimiento a lo establecido en el artículo 37, fracciones II y III de la Ley de Fiscalización Superior del Estado de Guanajuato, le informo que se dispone de un plazo perentorio por lo que se requiere de su valioso apoyo para integrar la información y documental necesaria para solventar dicho instrumento, misma que deberá ser ingresada a esta Coordinación con fecha límite el día 8 de enero de la del año entrante antes de las 12:00 horas; enfatizando que la información requerida deberá ser presentada en medio magnético, a través de disco compacto o cualquier otro dispositivo magnético de almacenamiento físico, salvo aquella que necesariamente deba ser impresa o fotocopiada, Lo anterior es indispensable para garantizar que esta Coordinación brinde atención en tiempo y forma a los requerimientos de la instancia fiscalizadora.`,
+    respuesta: `En mi carácter de titular de esta Coordinación, comparezco para exponer:<br><br>Se hace referencia al oficio con número de control: <b>[oficio_atende]</b>, mediante el cual esa autoridad fiscalizadora requiere información vinculada a los trabajos de planeación de la Revisión de la Cuenta Pública del Poder Ejecutivo del Estado de Guanajuato, correspondientes al ejercicio fiscal comprendido del 1 de enero al 31 de diciembre de 2025.`
+};
+
+let dataRegistros = [];
+let actual = null;
+
+window.onload = async () => {
+    const { data } = await _supabase.from('ofassalida').select('*');
+    if(data) {
+        dataRegistros = data;
+        const sel = document.getElementById('sel-ofa');
+        sel.innerHTML = '<option value="">-- Seleccione --</option>';
+        data.forEach(r => sel.innerHTML += `<option value="${r["OFA Salida"]}">${r["OFA Salida"]}</option>`);
+    }
+};
+
+function actualizarInterfaz() {
+    const folio = document.getElementById('sel-ofa').value;
+    actual = dataRegistros.find(r => r["OFA Salida"] === folio);
+    if(!actual) return;
+
+    // CORRECCIÓN: Limpieza total de etiquetas para que no se encimen
+    const tagBox = document.getElementById('tag-box');
+    tagBox.innerHTML = '';
+    
+    // Lista de campos eliminando duplicados
+    const unicos = [...new Set(Object.values(actual))].filter(v => v && v.toString().trim() !== "");
+
+    unicos.forEach(valor => {
+        const tag = document.createElement('div');
+        tag.className = 'info-tag';
+        tag.innerText = valor;
+        tag.onclick = () => inyectarDato(valor);
+        tagBox.appendChild(tag);
+    });
+
+    cambiarPlantilla();
+}
+
+function inyectarDato(valor) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(document.createTextNode(valor));
+    document.getElementById('sheet-editor').dispatchEvent(new Event('input'));
+}
+
+function cambiarPlantilla() {
+    const tipo = document.getElementById('sel-tipo').value;
+    let cuerpo = TEXTOS[tipo];
+
+    // Sustitución automática de etiquetas base
+    cuerpo = cuerpo.replace(/\[oficio_emisor\]/g, actual.oficio_emisor || '__________');
+    cuerpo = cuerpo.replace(/\[oficio_atende\]/g, actual.oficio_atende || '__________');
+
+    document.getElementById('cuerpo-editable').innerHTML = cuerpo;
+    document.getElementById('v-folio').innerText = actual["OFA Salida"];
+    document.getElementById('v-asunto').innerText = tipo === 'solicitud' ? "SOLICITUD DE INFORMACIÓN" : "RESPUESTA A REQUERIMIENTO";
+    document.getElementById('v-fecha').innerText = new Date().toLocaleDateString('es-MX', {day:'numeric', month:'long', year:'numeric'});
+    
+    iniciarAutoGuardado();
+}
+
+// AUTO-GUARDADO
+function iniciarAutoGuardado() {
+    const editor = document.getElementById('sheet-editor');
+    editor.oninput = () => {
+        localStorage.setItem('respaldo_' + actual["OFA Salida"], editor.innerHTML);
+        const indicator = document.getElementById('save-indicator');
+        indicator.style.display = 'block';
+        setTimeout(() => { indicator.style.display = 'none'; }, 1500);
+    };
+}
+
+function exportarWord() {
+    const content = document.getElementById('sheet-editor').innerHTML;
+    const converted = htmlDocx.asBlob(content, {orientation: 'portrait'});
+    saveAs(converted, `Oficio_${actual["OFA Salida"]}.doc`);
+}
+
+function exportarAGoogleDocs() {
+    const content = document.getElementById('sheet-editor').innerHTML;
+    const htmlFull = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset="utf-8"><style>@page { size: 21.59cm 27.94cm; margin: 3.5cm 2.5cm 2cm 3cm; } body { font-family: 'Arial'; font-size: 11pt; }</style></head>
+    <body>${content}</body></html>`;
+    const blob = new Blob(['\ufeff', htmlFull], { type: 'application/msword' });
+    saveAs(blob, `Oficio_${actual["OFA Salida"].replace(/\//g, '-')}.doc`);
+    alert("Archivo generado. Súbelo a Drive para abrirlo con Google Docs.");
+}
+</script>
+</body>
+</html>

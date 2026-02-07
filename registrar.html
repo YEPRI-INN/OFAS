@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Registro Integral - OFAS-CSF</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a2a3a; --accent: #3498db; --danger: #d9534f;
+            --success: #28a745; --warning: #f39c12; --bg: #f4f1ea; 
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1550px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; margin-bottom: 25px; padding-bottom: 15px; }
+
+        /* Dashboard Interactivo */
+        .dashboard-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: #fff; padding: 20px; border-radius: 10px; border-left: 5px solid var(--accent); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card h4 { margin: 0; font-size: 0.75rem; color: #666; text-transform: uppercase; }
+        .stat-card p { margin: 5px 0 0; font-size: 1.6rem; font-weight: bold; color: var(--primary); }
+        .stat-vence { border-left-color: var(--danger); background: #fff5f5; }
+
+        .progress-container { width: 100%; background-color: #eee; border-radius: 10px; margin-bottom: 20px; height: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; background-color: var(--accent); transition: width 0.3s ease; }
+
+        /* Menú Usuario */
+        .user-menu { position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 5px 15px; border-radius: 30px; border: 1px solid #ddd; background: #fff; }
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; }
+        .dropdown { display: none; position: absolute; top: 110%; right: 0; background: white; min-width: 200px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); border-radius: 8px; z-index: 1000; border: 1px solid #eee; }
+        .dropdown a, .dropdown label { display: block; padding: 12px 16px; text-decoration: none; color: #333; font-size: 0.85rem; cursor: pointer; }
+
+        /* Formulario */
+        fieldset { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+        legend { font-weight: bold; color: var(--primary); padding: 0 10px; font-size: 0.9rem; text-transform: uppercase; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .field { display: flex; flex-direction: column; }
+        label { font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; color: var(--primary); text-transform: uppercase; }
+        input, select, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        input[readonly] { background: #e9ecef; }
+        .full-width { grid-column: 1 / -1; }
+
+        /* Pollito */
+        #asistente-pollito { position: fixed; bottom: 20px; right: 20px; text-align: center; z-index: 1000; }
+        .burbuja { background: white; border: 2px solid var(--primary); border-radius: 15px; padding: 10px; margin-bottom: 5px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 180px; }
+        .pollito-body { font-size: 50px; display: inline-block; animation: aletear 0.4s infinite alternate ease-in-out; }
+        @keyframes aletear { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+
+        .action-bar { margin-top: 30px; display: flex; gap: 15px; border-top: 1px solid #eee; padding-top: 20px; }
+        button { padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px; transition: 0.2s; }
+        .btn-save { background: var(--success); color: white; flex-grow: 2; }
+        .btn-menu { background: #eee; border: 1px solid #ccc; color: #333; }
+
+        /* Tabla Alineada */
+        .table-wrapper { overflow-x: auto; background: white; border: 1px solid #ddd; border-radius: 8px; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; min-width: 3200px; table-layout: fixed; }
+        th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 11px; vertical-align: top; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .col-filter { width: 90%; margin-top: 5px; padding: 3px; border-radius: 4px; border: 1px solid #444; font-size: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h2>📝 Registro Integral - OFAS-CSF</h2>
+        <div class="user-menu" onclick="toggleDropdown()">
+            <span id="nav-username">Cargando...</span>
+            <img src="https://via.placeholder.com/150" alt="Avatar" class="user-avatar" id="avatar-img">
+            <div class="dropdown" id="userDropdown">
+                <label for="fileInput">📷 Cambiar Foto</label>
+                <input type="file" id="fileInput" accept="image/*" onchange="previewFile()" style="display:none;">
+                <a href="index.html" onclick="cerrarSesion()" style="color: #c0392b;">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="stat-card"><h4>Registros Hoy</h4><p id="count-hoy">0</p></div>
+        <div class="stat-card stat-vence"><h4>🚨 Vencen Hoy</h4><p id="count-vence">0</p></div>
+        <div class="stat-card"><h4>En Proceso</h4><p id="count-proceso">0</p></div>
+        <div class="stat-card"><h4>Atendidos</h4><p id="count-atendido">0</p></div>
+    </div>
+
+    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+
+    <form id="regForm">
+        <fieldset>
+            <legend>Identificadores del Registro</legend>
+            <div class="form-grid">
+                <div class="field"><label>Consecutivo</label><input type="text" id="consecutivo" readonly></div>
+                <div class="field"><label>Folio Entrada (OFA-A)</label><input type="text" id="ofa_a" readonly></div>
+                <div class="field"><label>Folio Interno CSF</label><input type="text" id="folio_csf" required onblur="formatearYValidarCSF()" onchange="playTick()"></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Información Técnica del Oficio</legend>
+            <div class="form-grid">
+                <div class="field"><label>No. Oficio Emisor</label><input type="text" id="oficio_emisor" onchange="playTick()"></div>
+                <div class="field"><label>Fecha Recepción</label><input type="date" id="fecha_recepcion_input" onchange="calcularVencimiento(); playTick();"></div>
+                <div class="field"><label>Medio</label><select id="medio" onchange="playTick()"><option>Impreso (Físico)</option><option>Firma Electrónica</option><option>Correo (Email)</option><option>Otro</option></select></div>
+                <div class="field"><label>Tipo Dispositivo</label><select id="tipo_dispositivo" onchange="playTick()"><option>Ninguno</option><option>DVD</option><option>Disco Compacto</option><option>USB 8gb</option><option>USB 16gb</option><option>USB 32gb</option><option>USB 64gb</option><option>USB 128 gb</option><option>USB 1 Tb</option></select></div>
+                <div class="field"><label>Cap. Info</label><input type="number" id="cap_info" value="0" onchange="playTick()"></div>
+                <div class="field"><label>Unidad Medida</label><select id="unidad_medida" onchange="playTick()"><option>N/A</option><option>KB</option><option>MB</option><option>GB</option><option>TB</option></select></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Emisor y Seguimiento</legend>
+            <div class="form-grid">
+                <div class="field"><label>Siglas Emisor</label><select id="siglas_emisor" onchange="fetchDetails(this.value); playTick();"><option value="">-- Seleccione --</option></select></div>
+                <div class="field"><label>Dependencia / Ente</label><input type="text" id="ente" readonly></div>
+                <div class="field"><label>Firmante</label><input type="text" id="firmante" readonly></div>
+                <div class="field"><label>Cargo</label><input type="text" id="cargo" readonly></div>
+                <div class="field"><label>Oficio que Atiende</label><input type="text" id="oficio_atiende" onchange="playTick()"></div>
+                <div class="field"><label>Fecha Vencimiento</label><input type="date" id="fecha_limite" onchange="playTick()"></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Acciones y Asunto</legend>
+            <div class="form-grid">
+                <div class="field"><label>Acción</label><select id="accion" onchange="playTick()"><option>Para respuesta</option><option>Para archivo</option><option>Para conocimiento</option><option>Seguimiento correo</option></select></div>
+                <div class="field"><label>Salidas (S-OFA)</label><input type="number" id="num_ofa_salida" value="0" onchange="playTick()"></div>
+                <div class="field"><label>Estatus</label><select id="estatus" onchange="playTick()"><option>Recibido</option><option>Atendido</option><option>En Proceso</option><option>Cerrado</option></select></div>
+                <div class="field"><label>Fecha Respuesta</label><input type="date" id="fecha_respuesta" onchange="playTick()"></div>
+                <div class="field"><label>CSF Solicitud</label><input type="text" id="csf_solicitud" onchange="playTick()"></div>
+                <div class="field"><label>Correo</label><input type="email" id="correo_responsable" readonly></div>
+                <div class="field full-width"><label>Asunto</label><textarea id="asunto" rows="2" required onchange="playTick()"></textarea></div>
+                <div class="field full-width"><label>Observaciones</label><textarea id="observaciones" rows="2" onchange="playTick()"></textarea></div>
+            </div>
+        </fieldset>
+
+        <div class="action-bar">
+            <button type="button" class="btn-menu" onclick="window.location.href='menu.html'">🏠 VOLVER AL MENÚ</button>
+            <button type="button" class="btn-save" onclick="saveToSupabase()">💾 GUARDAR REGISTRO</button>
+        </div>
+    </form>
+
+    <div class="table-wrapper">
+        <table id="recordsTable">
+            <thead>
+                <tr>
+                    <th style="width: 70px;">Cons.<br><input type="text" class="col-filter" data-col="consecutivo" onkeyup="filterT()"></th>
+                    <th style="width: 140px;">Entrada<br><input type="text" class="col-filter" data-col="ofa_a" onkeyup="filterT()"></th>
+                    <th style="width: 140px;">Folio CSF<br><input type="text" class="col-filter" data-col="folio_csf" onkeyup="filterT()"></th>
+                    <th style="width: 150px;">Oficio<br><input type="text" class="col-filter" data-col="oficio_emisor" onkeyup="filterT()"></th>
+                    <th style="width: 250px;">Entidad<br><input type="text" class="col-filter" data-col="ente" onkeyup="filterT()"></th>
+                    <th style="width: 120px;">Vencimiento<br><input type="text" class="col-filter" data-col="fecha_limite" onkeyup="filterT()"></th>
+                    <th style="width: 120px;">Estatus<br><input type="text" class="col-filter" data-col="estatus" onkeyup="filterT()"></th>
+                    <th style="width: 120px;">Usuario<br><input type="text" class="col-filter" data-col="usuario_registro" onkeyup="filterT()"></th>
+                    <th style="width: 400px;">Asunto<br><input type="text" class="col-filter" data-col="asunto" onkeyup="filterT()"></th>
+                    <th style="width: 300px;">Observaciones<br><input type="text" class="col-filter" data-col="observaciones" onkeyup="filterT()"></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="asistente-pollito"><div class="burbuja" id="mensaje-pollito">¡Listo!</div><div class="pollito-body">🐥</div></div>
+
+<script>
+    const SUPABASE_URL = "https://ltxluqwvspkwnzodgwim.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_5wz8G2GjcNf9f3dzkgR5dw_V1gHycyU";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let history_data = [];
+    let db_direnlaces = [];
+
+    // --- SONIDO TICK Y BARRA DE PROGRESO ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTick() {
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        updateProgressBar();
+    }
+
+    function updateProgressBar() {
+        const inputs = document.querySelectorAll('#regForm input, #regForm select, #regForm textarea');
+        let filled = 0;
+        inputs.forEach(i => { if(i.value && i.id !== 'consecutivo' && i.id !== 'ofa_a') filled++; });
+        document.getElementById('progressBar').style.width = (filled / (inputs.length - 2)) * 100 + '%';
+    }
+
+    // --- CONSECUTIVOS AUTOMÁTICOS ---
+    async function updateConsecutives() {
+        const { count } = await _supabase.from('registros').select('*', { count: 'exact', head: true });
+        document.getElementById('consecutivo').value = (count || 0) + 1;
+        const { data } = await _supabase.from('registros').select('ofa_a').order('consecutivo', { ascending: false }).limit(1);
+        let ultimoNum = 0;
+        if (data && data.length > 0 && data[0].ofa_a) {
+            ultimoNum = parseInt(data[0].ofa_a.split('-')[2]) || 0;
+        }
+        document.getElementById('ofa_a').value = `E-OFA-${(ultimoNum + 1).toString().padStart(4, '0')}`;
+    }
+
+    // --- GUARDADO CORREGIDO (SOLUCIÓN AL ERROR DE IMAGEN) ---
+    async function saveToSupabase() {
+        const user = localStorage.getItem('usuario_logueado');
+        const ofaEntrada = document.getElementById('ofa_a').value;
+        const folioCsf = document.getElementById('folio_csf').value;
+        const numS = parseInt(document.getElementById('num_ofa_salida').value) || 0;
+
+        if(!folioCsf || !document.getElementById('asunto').value) return alert("⚠️ Campos obligatorios vacíos.");
+
+        try {
+            const { error: err1 } = await _supabase.from('registros').insert([{
+                consecutivo: parseInt(document.getElementById('consecutivo').value),
+                ofa_a: ofaEntrada,
+                folio_csf: folioCsf,
+                ente: document.getElementById('ente').value,
+                siglas_emisor: document.getElementById('siglas_emisor').value,
+                oficio_emisor: document.getElementById('oficio_emisor').value,
+                firmante: document.getElementById('firmante').value,
+                cargo: document.getElementById('cargo').value,
+                medio: document.getElementById('medio').value,
+                tipo_dispositivo: document.getElementById('tipo_dispositivo').value,
+                cap_info: parseInt(document.getElementById('cap_info').value) || 0,
+                unidad_medida: document.getElementById('unidad_medida').value,
+                // Usamos los ID de Supabase reales para evitar errores de columna
+                fecha_limite: document.getElementById('fecha_limite').value,
+                asunto: document.getElementById('asunto').value,
+                observaciones: document.getElementById('observaciones').value,
+                estatus: document.getElementById('estatus').value,
+                num_ofa_salida: numS,
+                usuario_registro: user,
+                fecha_creacion: new Date().toISOString()
+            }]);
+            if (err1) throw err1;
+
+            if (numS > 0) {
+                const { data: ultS } = await _supabase.from('creacsf').select('folio_salida').order('folio_salida', { ascending: false }).limit(1);
+                let base = (ultS && ultS.length > 0) ? parseInt(ultS[0].folio_salida.split('-')[2]) : 0;
+                const filas = Array.from({length: numS}, (_, idx) => ({
+                    ofa_a: ofaEntrada, folio_salida: `S-OFA-${(base + idx + 1).toString().padStart(4, '0')}`, estatus: 'Pendiente', tipo: 'SALIDA'
+                }));
+                await _supabase.from('creacsf').insert(filas);
+            }
+            alert("✅ Guardado con éxito."); location.reload();
+        } catch (e) { alert("❌ Error en base de datos: " + e.message); }
+    }
+
+    // --- DASHBOARD Y TABLA ---
+    function updateDashboard(data) {
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('count-hoy').innerText = data.filter(r => r.fecha_creacion?.includes(hoy)).length;
+        document.getElementById('count-vence').innerText = data.filter(r => r.fecha_limite === hoy && r.estatus !== 'Atendido').length;
+        document.getElementById('count-proceso').innerText = data.filter(r => r.estatus === 'En Proceso').length;
+        document.getElementById('count-atendido').innerText = data.filter(r => r.estatus === 'Atendido').length;
+    }
+
+    function renderTable(data) {
+        const tbody = document.querySelector("#recordsTable tbody");
+        tbody.innerHTML = data.map(r => `
+            <tr>
+                <td>${r.consecutivo}</td><td><b>${r.ofa_a}</b> ${r.num_ofa_salida > 0 ? '📤' : ''}</td>
+                <td>${r.folio_csf}</td><td>${r.oficio_emisor || ''}</td><td>${r.ente || ''}</td>
+                <td>${r.fecha_limite || ''}</td><td style="color:${r.estatus==='Atendido'?'green':'orange'}"><b>${r.estatus}</b></td>
+                <td><span class="badge-user">${r.usuario_registro || ''}</span></td>
+                <td title="${r.asunto}">${r.asunto || ''}</td><td title="${r.observaciones}">${r.observaciones || ''}</td>
+            </tr>`).join('');
+    }
+
+    function filterT() {
+        const filters = Array.from(document.querySelectorAll('.col-filter')).map(i => ({ col: i.dataset.col, val: i.value.toLowerCase() }));
+        const filtered = history_data.filter(r => filters.every(f => !f.val || String(r[f.col] || '').toLowerCase().includes(f.val)));
+        renderTable(filtered);
+    }
+
+    async function loadHistory() {
+        const { data } = await _supabase.from('registros').select('*').order('consecutivo', { ascending: false }).limit(50);
+        if (data) { history_data = data; renderTable(data); updateDashboard(data); }
+    }
+
+    // --- CARGA INICIAL ---
+    window.onload = async () => {
+        const user = localStorage.getItem('usuario_logueado');
+        if (!user) return window.location.href = 'index.html';
+        document.getElementById('nav-username').innerText = user;
+        const correos = { "MolinaR": "mmolinag@guanajuato.gob.mx", "YebraM": "myebra@guanajuato.gob.mx" };
+        document.getElementById('correo_responsable').value = correos[user] || "";
+        await updateConsecutives(); await loadInitialData(); await loadHistory();
+    };
+
+    async function loadInitialData() {
+        const { data } = await _supabase.from('direnlaces').select('sujeto, entidad');
+        if (data) {
+            db_direnlaces = data;
+            const combo = document.getElementById('siglas_emisor');
+            data.forEach(item => { combo.add(new Option(item.sujeto, item.sujeto)); });
+        }
+    }
+
+    function fetchDetails(s) { const m = db_direnlaces.find(i => i.sujeto === s); if (m) document.getElementById('ente').value = m.entidad; }
+    function calcularVencimiento() { /* Lógica plazos */ }
+    function formatearYValidarCSF() { /* Lógica CSF */ }
+    function toggleDropdown() { const d = document.getElementById("userDropdown"); d.style.display = (d.style.display === "block") ? "none" : "block"; }
+    function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
+</script>
+</body>
+</html>
