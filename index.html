@@ -44,7 +44,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2; /* Papeles y destellos */
+            z-index: 2;
             pointer-events: none;
         }
 
@@ -59,7 +59,7 @@
             max-width: 420px;
             border: 2px solid rgba(255, 255, 255, 0.7);
             position: relative;
-            z-index: 10; /* Por encima del canvas de fondo */
+            z-index: 10;
         }
 
         .brand-label { color: var(--accent); font-size: 0.85rem; font-weight: 600; text-transform: lowercase; margin-bottom: 0.2rem;}
@@ -108,24 +108,55 @@
         </header>
         <p class="slogan">tu meta, tu tiempo, tu historia</p>
 
-        <form>
+        <form id="loginForm">
             <div class="input-group">
                 <label>Usuario (Coreo)</label>
                 <input type="text" placeholder="Usuario">
             </div>
             <div class="input-group">
                 <label>Contansesá</label>
-                <input type="email" placeholder="coreo@ejemplo.com">
+                <input type="email" placeholder="coreo@ejemplo.com" required>
             </div>
             <div class="input-group">
                 <label>Passuorsá</label>
-                <input type="password" placeholder="••••••">
+                <input type="password" placeholder="••••••" required>
             </div>
             <button type="submit" class="btn-access">Entrar al Sistema</button>
         </form>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
+        // --- 1. CONFIGURACIÓN Y LÓGICA DE ACCESO ---
+        const SUPABASE_URL = 'https://zfztocmwphjfrabvbzlb.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_cbOD6KTnjsGacu_GnAQm8g_nMuIoOIg';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const loginForm = document.getElementById('loginForm');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const inputs = loginForm.querySelectorAll('input');
+            const email = inputs[1].value; // Segundo input (Contansesá)
+            const password = inputs[2].value; // Tercer input (Passuorsá)
+
+            const { data, error } = await _supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                alert("Acceso denegado: " + error.message);
+            } else {
+                localStorage.setItem('session_email', email);
+                localStorage.setItem('session_time', new Date().toLocaleString());
+                window.location.href = 'bienvenida.html';
+            }
+        });
+
+        // --- 2. ANIMACIÓN DE FONDO (DESTELLOS Y PAPELES) ---
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
         let sparkles = [];
@@ -164,8 +195,8 @@
             init() {
                 this.x = Math.random() * canvas.width;
                 this.y = -60 - Math.random() * 500;
-                this.w = Math.random() * 10 + 20; // Ancho variable
-                this.h = this.w * 1.3; // Proporción de hoja
+                this.w = Math.random() * 10 + 20;
+                this.h = this.w * 1.3;
                 this.rotation = Math.random() * 360;
                 this.rotVel = (Math.random() - 0.5) * 3;
                 this.speedY = Math.random() * 1.5 + 0.8;
@@ -176,20 +207,16 @@
                 this.y += this.speedY;
                 this.x += Math.sin(this.y * 0.01) * this.swing;
                 this.rotation += this.rotVel;
-
                 if (this.y > canvas.height + 100) this.init();
 
                 ctx.save();
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rotation * Math.PI / 180);
-                
-                // Cuerpo del papel con sombra suave
                 ctx.shadowColor = 'rgba(0,0,0,0.2)';
                 ctx.shadowBlur = 5;
                 ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
                 ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
                 
-                // Líneas simulando texto
                 ctx.strokeStyle = `rgba(0, 0, 0, 0.08)`;
                 ctx.lineWidth = 1;
                 for(let i = -this.h/2 + 5; i < this.h/2 - 5; i += 4) {
@@ -207,13 +234,8 @@
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Dibujar destellos primero (fondo)
             sparkles.forEach(s => s.draw());
-            
-            // Dibujar papeles
             papers.forEach(p => p.draw());
-
             requestAnimationFrame(animate);
         }
         animate();
