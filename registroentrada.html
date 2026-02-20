@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitácora Pro | OFAS METAX PRO</title>
+    <title>Registro de Entrada | OFAS METAX PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
             --primary: #1e293b;
             --accent: #3b82f6;
-            --success: #10b981;
             --bg: #f8fafc;
+            --white: #ffffff;
             --border: #e2e8f0;
         }
 
@@ -21,196 +20,275 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
             margin: 0;
+            padding: 20px;
             color: var(--primary);
         }
 
-        .container { padding: 2rem; }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
 
-        /* Cabecera */
-        .header-box {
+        header {
+            border-bottom: 2px solid #f1f5f9;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
         }
 
-        .title-info h1 { margin: 0; font-size: 1.6rem; color: var(--primary); }
-        .title-info p { margin: 5px 0 0; color: #64748b; }
-
-        .btn-group { display: flex; gap: 10px; }
-        
-        button, .btn-link {
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            text-decoration: none;
-            transition: 0.2s;
-            font-size: 0.9rem;
-        }
-
-        .btn-excel { background: var(--success); color: white; }
-        .btn-refresh { background: var(--accent); color: white; }
-        .btn-back { background: #64748b; color: white; }
-
-        /* Tabla de Datos */
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.8rem;
-            min-width: 2500px; /* Ancho suficiente para todos los campos */
-        }
-
-        th {
+        .section-title {
+            grid-column: span 3;
             background: #f1f5f9;
-            padding: 15px;
-            text-align: left;
-            border-bottom: 2px solid var(--border);
-            color: #475569;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 20px 0 10px 0;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
-        td {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border);
-            white-space: nowrap;
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
 
-        tr:hover { background-color: #f8fafc; }
+        .field { display: flex; flex-direction: column; }
+        .field label { font-size: 0.75rem; font-weight: 700; margin-bottom: 6px; color: #64748b; text-transform: uppercase; }
+        
+        input, select, textarea {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s;
+        }
 
-        /* Estilos de Celdas Especiales */
-        .badge-ofa {
-            background: #dbeafe;
-            color: #1e40af;
-            padding: 4px 8px;
-            border-radius: 4px;
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); 
+        }
+
+        .full { grid-column: span 3; }
+        .double { grid-column: span 2; }
+
+        .btn-save {
+            grid-column: span 3;
+            background: var(--accent);
+            color: white;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
             font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: transform 0.2s, background 0.3s;
         }
 
-        .status-tag {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-            background: #fef3c7;
-            color: #92400e;
-        }
+        .btn-save:hover { background: #2563eb; transform: translateY(-2px); }
+        .btn-back { text-decoration: none; color: #64748b; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header-box">
-        <div class="title-info">
-            <h1>Bitácora de Folios de Entrada</h1>
-            <p>OFAS METAX PRO - Sistema de Correspondencia Evolucionado</p>
+    <header>
+        <div>
+            <h1 style="margin:0; font-size: 1.6rem;">Registro de Entrada Manual</h1>
+            <p style="margin:5px 0 0; color:#64748b;">OFAS METAX PRO | tu meta, tu tiempo, tu historia</p>
         </div>
-        <div class="btn-group">
-            <a href="dashboard.html" class="btn-back">← Registro</a>
-            <button class="btn-excel" onclick="exportarExcel()">📊 Descargar Excel</button>
-            <button class="btn-refresh" onclick="cargarRegistros()">🔄 Actualizar</button>
-        </div>
-    </div>
+        <a href="bienvenida.html" class="btn-back">⬅ Volver al Panel</a>
+    </header>
 
-    <div class="table-container">
-        <table id="bitacoraTable">
-            <thead>
-                <tr>
-                    <th>Conse. Regis</th>
-                    <th>Folio Entrada (OFA_E)</th>
-                    <th>Folio Interno</th>
-                    <th>Medio</th>
-                    <th>Tipo Dispo</th>
-                    <th>Cap. Info</th>
-                    <th>Uni. Medi</th>
-                    <th>Siglas Emisor</th>
-                    <th>Dependencia / Ente</th>
-                    <th>Firmante</th>
-                    <th>Cargo</th>
-                    <th>Oficio que Atiende</th>
-                    <th>Fecha Vencimiento</th>
-                    <th>Acción</th>
-                    <th>Folio Salida (OFA_S)</th>
-                    <th>Estatus</th>
-                    <th>Asunto</th>
-                    <th>Comentarios</th>
-                </tr>
-            </thead>
-            <tbody id="tablaCuerpo">
-                </tbody>
-        </table>
-    </div>
+    <form id="registroEntradaForm" class="form-grid">
+        
+        <div class="section-title">1. Control de Folios e Ingreso</div>
+        <div class="field">
+            <label>Consecutivo (Automático)</label>
+            <input type="text" id="conse_regis" placeholder="ID automático" disabled>
+        </div>
+        <div class="field">
+            <label>Folio Entrada (OFA_E)</label>
+            <input type="text" id="ofa_e" placeholder="Ej: E-OFA-00001" required>
+        </div>
+        <div class="field">
+            <label>Folio Interno</label>
+            <input type="text" id="folio_inter" placeholder="Referencia interna">
+        </div>
+        <div class="field double">
+            <label>Número de Oficio a Ingresar</label>
+            <input type="text" id="num_oficio_ingresar" required placeholder="Ej: AECF(CIC)/MSIL2124/009">
+        </div>
+        <div class="field">
+            <label>Fecha Ingreso Oficio</label>
+            <input type="date" id="fecha_ingreo_ofi" required>
+        </div>
+
+        <div class="section-title">2. Información del Emisor</div>
+        <div class="field">
+            <label>Siglas Emisor</label>
+            <input type="text" id="siglas_emis" placeholder="Ej: CF-ASEG">
+        </div>
+        <div class="field double">
+            <label>Dependencia / Ente</label>
+            <input type="text" id="entidad_dep" required placeholder="Nombre de la Institución">
+        </div>
+        <div class="field">
+            <label>Firmante</label>
+            <input type="text" id="quien_firma" placeholder="Nombre completo">
+        </div>
+        <div class="field double">
+            <label>Cargo / Puesto</label>
+            <input type="text" id="puesto_firma" placeholder="Cargo del firmante">
+        </div>
+
+        <div class="section-title">3. Detalles Técnicos (Dispositivos)</div>
+        <div class="field">
+            <label>Medio de Entrega</label>
+            <select id="medio_entrega">
+                <option value="Fisico">Físico</option>
+                <option value="Digital">Digital</option>
+                <option value="Correo">Correo Electrónico</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Tipo Dispositivo</label>
+            <input type="text" id="tipo_dispo" placeholder="USB, CD, Disco, etc.">
+        </div>
+        <div class="field">
+            <label>Capacidad (Info)</label>
+            <input type="text" id="cap_info" placeholder="Ej: 500">
+        </div>
+        <div class="field">
+            <label>Unidad Medida</label>
+            <select id="uni_medi">
+                <option value="N/A">N/A</option>
+                <option value="MB">MB</option>
+                <option value="GB">GB</option>
+                <option value="TB">TB</option>
+                <option value="Fojas">Fojas</option>
+            </select>
+        </div>
+
+        <div class="section-title">4. Seguimiento y Estatus</div>
+        <div class="field full">
+            <label>Asunto / Firma</label>
+            <textarea id="asunto_firma" rows="2" placeholder="Resumen del asunto del oficio..."></textarea>
+        </div>
+        <div class="field">
+            <label>Oficio que Atiende</label>
+            <input type="text" id="ofi_firmante" placeholder="Referencia previa">
+        </div>
+        <div class="field">
+            <label>Fecha Vencimiento</label>
+            <input type="date" id="fecha_venci">
+        </div>
+        <div class="field">
+            <label>Acción a Realizar</label>
+            <input type="text" id="accion_realizar">
+        </div>
+        <div class="field">
+            <label>Folio Salida (OFA_S)</label>
+            <input type="text" id="ofa_s" placeholder="Folio de respuesta">
+        </div>
+        <div class="field">
+            <label>Estatus</label>
+            <select id="estatus">
+                <option value="Pendiente">Pendiente</option>
+                <option value="En Trámite">En Trámite</option>
+                <option value="Turnado">Turnado</option>
+                <option value="Atendido">Atendido</option>
+            </select>
+        </div>
+        <div class="field full">
+            <label>Comentarios</label>
+            <input type="text" id="comenta" placeholder="Notas administrativas adicionales">
+        </div>
+
+        <button type="submit" class="btn-save">💾 Guardar Registro en Base de Datos</button>
+    </form>
 </div>
 
 <script>
     // Configuración de Supabase
     const SB_URL = 'TU_URL_DE_SUPABASE';
     const SB_KEY = 'TU_ANON_KEY';
-    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+    const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    async function cargarRegistros() {
-        const { data, error } = await supabaseClient
-            .from('correspondencias')
-            .select('*')
-            .order('conse_regis', { ascending: false });
+    const form = document.getElementById('registroEntradaForm');
 
-        if (error) {
-            console.error("Error al obtener datos:", error);
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // 1. Verificar Sesión para Auditoría
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            alert("⚠️ Sesión expirada. Por favor, inicia sesión nuevamente.");
+            window.location.href = 'index.html';
             return;
         }
 
-        const tbody = document.getElementById('tablaCuerpo');
-        tbody.innerHTML = '';
+        // 2. Mapeo de los 20 campos técnicos
+        const registro = {
+            ofa_e: document.getElementById('ofa_e').value,
+            folio_inter: document.getElementById('folio_inter').value,
+            num_oficio_ingresar: document.getElementById('num_oficio_ingresar').value,
+            fecha_ingreo_ofi: document.getElementById('fecha_ingreo_ofi').value,
+            siglas_emis: document.getElementById('siglas_emis').value,
+            entidad_dep: document.getElementById('entidad_dep').value,
+            quien_firma: document.getElementById('quien_firma').value,
+            puesto_firma: document.getElementById('puesto_firma').value,
+            medio_entrega: document.getElementById('medio_entrega').value,
+            tipo_dispo: document.getElementById('tipo_dispo').value,
+            cap_info: document.getElementById('cap_info').value,
+            uni_medi: document.getElementById('uni_medi').value,
+            asunto_firma: document.getElementById('asunto_firma').value,
+            ofi_firmante: document.getElementById('ofi_firmante').value,
+            fecha_venci: document.getElementById('fecha_venci').value || null,
+            accion_realizar: document.getElementById('accion_realizar').value,
+            ofa_s: document.getElementById('ofa_s').value,
+            estatus: document.getElementById('estatus').value,
+            comenta: document.getElementById('comenta').value,
+            creado_por: session.user.id
+        };
 
-        data.forEach(reg => {
-            // Formateo dinámico del Folio de Entrada
-            const ofa_e = `E-OFA-${String(reg.conse_regis).padStart(5, '0')}`;
-            
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${reg.conse_regis}</strong></td>
-                <td><span class="badge-ofa">${ofa_e}</span></td>
-                <td>${reg.folio_inter || '-'}</td>
-                <td>${reg.medio_entrega || '-'}</td>
-                <td>${reg.tipo_dispo || '-'}</td>
-                <td>${reg.cap_info || '-'}</td>
-                <td>${reg.uni_medi || '-'}</td>
-                <td>${reg.siglas_emis || '-'}</td>
-                <td><strong>${reg.entidad_dep}</strong></td>
-                <td>${reg.quien_firma || '-'}</td>
-                <td>${reg.puesto_firma || '-'}</td>
-                <td>${reg.ofi_firmante || '-'}</td>
-                <td>${reg.fecha_venci || '-'}</td>
-                <td>${reg.accion_realizar || '-'}</td>
-                <td>${reg.ofa_s || 'Sin salida'}</td>
-                <td><span class="status-tag">${reg.estatus}</span></td>
-                <td style="white-space: normal; min-width: 300px;">${reg.asunto_firma || '-'}</td>
-                <td>${reg.comenta || '-'}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
+        try {
+            // 3. Insertar Registro Principal
+            const { data, error } = await supabase
+                .from('correspondencias')
+                .insert([registro])
+                .select()
+                .single();
 
-    function exportarExcel() {
-        const table = document.getElementById("bitacoraTable");
-        const wb = XLSX.utils.table_to_book(table, { sheet: "Bitácora OFAS PRO" });
-        XLSX.writeFile(wb, `Reporte_OFAS_PRO_${new Date().toLocaleDateString()}.xlsx`);
-    }
+            if (error) throw error;
 
-    // Ejecutar al cargar la página
-    cargarRegistros();
+            // 4. Registro de Log de Auditoría Automático
+            await supabase.from('logs_auditoria').insert([{
+                usuario_id: session.user.id,
+                accion: 'REGISTRO_MANUAL',
+                tabla_afectada: 'correspondencias',
+                registro_id: data.id,
+                detalle: `Registro exitoso del oficio ${registro.num_oficio_ingresar} (Folio: ${registro.ofa_e})`
+            }]);
+
+            alert("✅ ¡Registro OFAS METAX PRO guardado con éxito!");
+            form.reset();
+
+        } catch (error) {
+            console.error("Error:", error.message);
+            alert("❌ Error al guardar: " + error.message);
+        }
+    });
 </script>
 
 </body>
