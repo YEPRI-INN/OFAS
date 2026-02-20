@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registros | OFAS METAX PRO</title>
+    <title>Bitácora Pro | OFAS METAX PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -24,42 +24,41 @@
             color: var(--primary);
         }
 
-        .container {
-            padding: 2rem;
-            max-width: 100%;
-        }
+        .container { padding: 2rem; }
 
-        /* Encabezado */
-        .header-actions {
+        /* Cabecera */
+        .header-box {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
             background: white;
             padding: 1.5rem;
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
         }
 
-        .title-group h1 { margin: 0; font-size: 1.5rem; }
-        .title-group p { margin: 5px 0 0; color: #64748b; font-size: 0.9rem; }
+        .title-info h1 { margin: 0; font-size: 1.6rem; color: var(--primary); }
+        .title-info p { margin: 5px 0 0; color: #64748b; }
 
-        .button-group { display: flex; gap: 10px; }
-
-        button {
-            padding: 10px 20px;
+        .btn-group { display: flex; gap: 10px; }
+        
+        button, .btn-link {
+            padding: 10px 18px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             border: none;
-            transition: all 0.3s;
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 0.9rem;
         }
 
-        .btn-refresh { background: var(--accent); color: white; }
         .btn-excel { background: var(--success); color: white; }
-        .btn-back { background: #64748b; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; }
+        .btn-refresh { background: var(--accent); color: white; }
+        .btn-back { background: #64748b; color: white; }
 
-        /* Tabla Estilizada */
+        /* Tabla de Datos */
         .table-container {
             background: white;
             border-radius: 12px;
@@ -70,120 +69,119 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
-            min-width: 2000px; /* Para asegurar espacio a todos los campos */
+            font-size: 0.8rem;
+            min-width: 2500px; /* Ancho suficiente para todos los campos */
         }
 
         th {
             background: #f1f5f9;
             padding: 15px;
             text-align: left;
-            font-weight: 600;
             border-bottom: 2px solid var(--border);
-            white-space: nowrap;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         td {
             padding: 12px 15px;
             border-bottom: 1px solid var(--border);
-            vertical-align: middle;
+            white-space: nowrap;
         }
 
         tr:hover { background-color: #f8fafc; }
 
-        /* Etiquetas */
-        .badge-folio {
-            background: #eff6ff;
-            color: var(--accent);
+        /* Estilos de Celdas Especiales */
+        .badge-ofa {
+            background: #dbeafe;
+            color: #1e40af;
             padding: 4px 8px;
             border-radius: 4px;
             font-weight: 700;
-            border: 1px solid #dbeafe;
         }
 
-        .status {
+        .status-tag {
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.75rem;
             font-weight: 600;
-            text-transform: uppercase;
+            background: #fef3c7;
+            color: #92400e;
         }
-
-        .status-pendiente { background: #fef3c7; color: #92400e; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header-actions">
-        <div class="title-group">
-            <a href="dashboard.html" class="btn-back">← Volver al Panel</a>
-            <h1>Bitácora OFAS METAX PRO</h1>
-            <p>Listado general de correspondencia y folios generados</p>
+    <div class="header-box">
+        <div class="title-info">
+            <h1>Bitácora de Folios de Entrada</h1>
+            <p>OFAS METAX PRO - Sistema de Correspondencia Evolucionado</p>
         </div>
-        <div class="button-group">
-            <button class="btn-excel" onclick="exportarExcel()">📊 Exportar Excel</button>
-            <button class="btn-refresh" onclick="fetchData()">🔄 Actualizar</button>
+        <div class="btn-group">
+            <a href="dashboard.html" class="btn-back">← Registro</a>
+            <button class="btn-excel" onclick="exportarExcel()">📊 Descargar Excel</button>
+            <button class="btn-refresh" onclick="cargarRegistros()">🔄 Actualizar</button>
         </div>
     </div>
 
     <div class="table-container">
-        <table id="tablaGeneral">
+        <table id="bitacoraTable">
             <thead>
                 <tr>
-                    <th>Consecutivo</th>
+                    <th>Conse. Regis</th>
                     <th>Folio Entrada (OFA_E)</th>
                     <th>Folio Interno</th>
                     <th>Medio</th>
-                    <th>Tipo Dispositivo</th>
-                    <th>Capacidad</th>
-                    <th>Unidad</th>
+                    <th>Tipo Dispo</th>
+                    <th>Cap. Info</th>
+                    <th>Uni. Medi</th>
                     <th>Siglas Emisor</th>
                     <th>Dependencia / Ente</th>
                     <th>Firmante</th>
                     <th>Cargo</th>
                     <th>Oficio que Atiende</th>
-                    <th>Vencimiento</th>
+                    <th>Fecha Vencimiento</th>
                     <th>Acción</th>
+                    <th>Folio Salida (OFA_S)</th>
                     <th>Estatus</th>
                     <th>Asunto</th>
                     <th>Comentarios</th>
                 </tr>
             </thead>
-            <tbody id="listaRegistros">
+            <tbody id="tablaCuerpo">
                 </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // Configuración Supabase
-    const SUPABASE_URL = 'TU_URL_AQUI';
-    const SUPABASE_KEY = 'TU_KEY_AQUI';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Configuración de Supabase
+    const SB_URL = 'TU_URL_DE_SUPABASE';
+    const SB_KEY = 'TU_ANON_KEY';
+    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-    async function fetchData() {
+    async function cargarRegistros() {
         const { data, error } = await supabaseClient
             .from('correspondencias')
             .select('*')
             .order('conse_regis', { ascending: false });
 
         if (error) {
-            alert("Error al obtener datos: " + error.message);
+            console.error("Error al obtener datos:", error);
             return;
         }
 
-        const tbody = document.getElementById('listaRegistros');
+        const tbody = document.getElementById('tablaCuerpo');
         tbody.innerHTML = '';
 
         data.forEach(reg => {
-            // Generación visual del folio OFA_E basado en el consecutivo
-            const ofa_e_formato = `E-OFA-${String(reg.conse_regis).padStart(5, '0')}`;
-
+            // Formateo dinámico del Folio de Entrada
+            const ofa_e = `E-OFA-${String(reg.conse_regis).padStart(5, '0')}`;
+            
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${reg.id}</td>
-                <td><span class="badge-folio">${ofa_e_formato}</span></td>
+                <td><strong>${reg.conse_regis}</strong></td>
+                <td><span class="badge-ofa">${ofa_e}</span></td>
                 <td>${reg.folio_inter || '-'}</td>
                 <td>${reg.medio_entrega || '-'}</td>
                 <td>${reg.tipo_dispo || '-'}</td>
@@ -196,8 +194,9 @@
                 <td>${reg.ofi_firmante || '-'}</td>
                 <td>${reg.fecha_venci || '-'}</td>
                 <td>${reg.accion_realizar || '-'}</td>
-                <td><span class="status status-pendiente">${reg.estatus}</span></td>
-                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${reg.asunto_firma || '-'}</td>
+                <td>${reg.ofa_s || 'Sin salida'}</td>
+                <td><span class="status-tag">${reg.estatus}</span></td>
+                <td style="white-space: normal; min-width: 300px;">${reg.asunto_firma || '-'}</td>
                 <td>${reg.comenta || '-'}</td>
             `;
             tbody.appendChild(tr);
@@ -205,14 +204,13 @@
     }
 
     function exportarExcel() {
-        const table = document.getElementById("tablaGeneral");
-        const wb = XLSX.utils.table_to_book(table, { sheet: "Registros OFAS PRO" });
-        const nombreArchivo = `Reporte_OFAS_PRO_${new Date().toLocaleDateString()}.xlsx`;
-        XLSX.writeFile(wb, nombreArchivo);
+        const table = document.getElementById("bitacoraTable");
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Bitácora OFAS PRO" });
+        XLSX.writeFile(wb, `Reporte_OFAS_PRO_${new Date().toLocaleDateString()}.xlsx`);
     }
 
-    // Carga inicial
-    fetchData();
+    // Ejecutar al cargar la página
+    cargarRegistros();
 </script>
 
 </body>
