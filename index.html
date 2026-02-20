@@ -94,6 +94,19 @@
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
         .btn-access:hover { background: #2563eb; transform: translateY(-1px); }
+
+        /* Pie de página */
+        footer {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            z-index: 10;
+            letter-spacing: 0.5px;
+        }
+        footer strong { color: rgba(255, 255, 255, 0.9); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -125,6 +138,10 @@
         </form>
     </div>
 
+    <footer>
+        <strong>OFAS-METAX-PRO</strong> es un Sistema de Gestión Inteligente de 🐥<strong>YEPRI-INN</strong>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
@@ -139,8 +156,8 @@
             e.preventDefault();
             
             const inputs = loginForm.querySelectorAll('input');
-            const email = inputs[1].value; // Segundo input (Contansesá)
-            const password = inputs[2].value; // Tercer input (Passuorsá)
+            const email = inputs[1].value; 
+            const password = inputs[2].value; 
 
             const { data, error } = await _supabase.auth.signInWithPassword({
                 email: email,
