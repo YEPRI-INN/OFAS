@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menú Principal | OFAS METAX PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --accent: #3b82f6;
             --glass: rgba(255, 255, 255, 0.1);
             --border: rgba(255, 255, 255, 0.2);
+            --bg-dark: #020617;
         }
 
         body, html {
@@ -21,12 +23,6 @@
 
         #bgCanvas { position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
         
-        .water-line {
-            position: fixed; top: 15%; left: 0; width: 100%; height: 2px;
-            background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-            z-index: 2; filter: blur(1px);
-        }
-
         .dashboard {
             position: relative; z-index: 10;
             display: grid; grid-template-columns: 280px 1fr;
@@ -41,7 +37,7 @@
         }
 
         .user-profile { padding-bottom: 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-        .user-profile span { display: block; font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
+        .user-profile span { display: block; font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; }
         .user-profile h3 { margin: 8px 0 0; font-weight: 600; color: var(--accent); font-size: 1.1rem; }
 
         nav ul { list-style: none; padding: 0; }
@@ -50,11 +46,11 @@
             cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 12px;
         }
         nav li:hover { background: var(--glass); color: var(--accent); }
-        nav li.active { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        nav li.active { background: var(--accent); color: white; }
 
         /* Contenido Principal */
         main { padding: 4rem; overflow-y: auto; }
-        .header-main h1 { font-weight: 300; margin: 0; letter-spacing: -1px; font-size: 2.8rem; }
+        .header-main h1 { font-weight: 300; margin: 0; font-size: 2.8rem; }
         
         .grid-modules {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -63,17 +59,29 @@
 
         .module-card {
             background: var(--glass); border: 1px solid var(--border);
-            padding: 2.5rem; border-radius: 28px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer; position: relative;
+            padding: 2.5rem; border-radius: 28px; transition: 0.4s;
+            cursor: pointer;
         }
         .module-card:hover {
             transform: translateY(-12px); background: rgba(255, 255, 255, 0.15);
             border-color: var(--accent); box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
         .module-card h4 { margin: 0 0 12px 0; font-size: 1.3rem; color: var(--accent); }
-        .module-card p { margin: 0; font-size: 0.9rem; opacity: 0.7; line-height: 1.5; }
 
-        /* Ventanas Modales (Popups) */
+        /* Estilos Submenú (Inyectados dinámicamente) */
+        .btn-neon-blue {
+            width: 100%; padding: 1.5rem; margin-top: 15px; font-size: 1.1rem; color: #fff; 
+            background: rgba(59, 130, 246, 0.1); border: 2px solid var(--accent); 
+            border-radius: 15px; cursor: pointer; transition: 0.4s; font-weight: 600;
+            text-transform: uppercase;
+        }
+        .btn-neon-blue:hover {
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent), 0 0 30px var(--accent);
+            transform: translateY(-5px);
+        }
+
+        /* Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px);
@@ -81,14 +89,9 @@
         }
         .modal-content {
             background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border);
-            padding: 3rem; border-radius: 2rem; width: 90%; max-width: 600px;
-            position: relative; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            padding: 3rem; border-radius: 2rem; width: 90%; max-width: 550px;
+            position: relative; text-align: center;
         }
-        .close-modal {
-            position: absolute; top: 20px; right: 25px; font-size: 1.5rem;
-            cursor: pointer; opacity: 0.5; transition: 0.3s;
-        }
-        .close-modal:hover { opacity: 1; color: #ef4444; }
 
         .btn-logout {
             margin-top: auto; padding: 12px; background: rgba(239, 68, 68, 0.1);
@@ -96,13 +99,10 @@
             border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.3s;
         }
         .btn-logout:hover { background: #ef4444; color: white; }
-
-        footer { position: fixed; bottom: 20px; right: 40px; font-size: 0.75rem; opacity: 0.4; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-    <div class="water-line"></div>
     <canvas id="bgCanvas"></canvas>
 
     <div class="dashboard">
@@ -114,8 +114,7 @@
             <nav>
                 <ul>
                     <li class="active">🏠 Inicio</li>
-                    <li>📊 Estadísticas</li>
-                    <li>📂 Mis Proyectos</li>
+                    <li onclick="location.href='dashboard.html'">📊 Dashboard</li>
                     <li>⚙️ Configuración</li>
                 </ul>
             </nav>
@@ -129,63 +128,72 @@
             </div>
 
             <div class="grid-modules">
-                <div class="module-card" onclick="openModal('Gestión Operativa', 'Accediendo a los flujos de trabajo optimizados de OFAS METAX. Aquí podrás monitorear tareas en tiempo real.')">
-                    <h4>Gestión Operativa</h4>
-                    <p>Control de procesos internos y flujos de trabajo inteligentes.</p>
+                <div class="module-card" onclick="openModal('Gestión Operativa', 'Seleccione el método de entrada de datos para iniciar el proceso.', 'submenu')">
+                    <h4><i class="fas fa-cogs"></i> Gestión Operativa</h4>
+                    <p>Registro manual y automático de correspondencia oficial.</p>
                 </div>
-                <div class="module-card" onclick="openModal('Análisis de Datos', 'Cargando algoritmos de predicción. Visualiza el rendimiento global de tus activos.')">
-                    <h4>Análisis de Datos</h4>
-                    <p>Visualización de métricas y rendimiento en tiempo real.</p>
+                
+                <div class="module-card" onclick="openModal('Análisis de Datos', 'Accediendo a métricas avanzadas y reportes integrales.', 'dashboard.html')">
+                    <h4><i class="fas fa-chart-pie"></i> Análisis de Datos</h4>
+                    <p>Visualización de rendimiento y descarga de archivos.</p>
                 </div>
-                <div class="module-card" onclick="openModal('Seguridad 🐥', 'Protocolos YEPRI-INN activos. Tu cifrado de datos está operando bajo estándares máximos.')">
-                    <h4>Seguridad 🐥</h4>
-                    <p>Auditoría de conexiones y protocolos de protección avanzada.</p>
+
+                <div class="module-card" onclick="openModal('Seguridad 🐥', 'Protocolos YEPRI-INN activos. Cifrado de grado militar operando.')">
+                    <h4><i class="fas fa-shield-halved"></i> Seguridad 🐥</h4>
+                    <p>Auditoría de conexiones y protección de datos.</p>
                 </div>
             </div>
         </main>
     </div>
 
     <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
+        <div class="modal-content" id="modalContainer">
             <h2 id="modalTitle" style="color: var(--accent); font-weight: 300; font-size: 2rem;"></h2>
             <hr style="border: 0; border-top: 1px solid var(--border); margin: 2rem 0;">
-            <p id="modalBody" style="font-size: 1.1rem; line-height: 1.6; opacity: 0.9;"></p>
-            <button class="btn-logout" style="margin-top: 2rem; background: var(--accent); color: white; border: none; width: auto; padding: 12px 30px;" onclick="closeModal()">Entendido</button>
+            <div id="modalBodyContainer">
+                <p id="modalBody" style="font-size: 1.1rem; line-height: 1.6; opacity: 0.9; margin-bottom: 2rem;"></p>
+                <button class="btn-logout" style="background: var(--accent); color: white; border: none; width: auto; padding: 12px 40px;" onclick="closeModal()">Entendido</button>
+            </div>
         </div>
     </div>
 
-    <footer>
-        OFAS-METAX-PRO | YEPRI-INN © 2026
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = 'https://zfztocmwphjfrabvbzlb.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_cbOD6KTnjsGacu_GnAQm8g_nMuIoOIg';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let currentRedirect = "";
 
-        // Cargar Nombre de Usuario
-        const storedEmail = localStorage.getItem('session_email');
-        document.getElementById('userName').innerText = storedEmail ? storedEmail.split('@')[0].toUpperCase() : 'USUARIO';
-
-        // Funciones del Modal
-        function openModal(title, body) {
+        function openModal(title, body, type = "") {
+            const overlay = document.getElementById('modalOverlay');
+            const bodyContent = document.getElementById('modalBodyContainer');
+            
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalBody').innerText = body;
-            document.getElementById('modalOverlay').style.display = 'flex';
+            currentRedirect = type;
+
+            // Si es submenú, inyectamos los botones neón
+            if (type === 'submenu') {
+                bodyContent.innerHTML = `
+                    <p style="margin-bottom:20px; opacity:0.8;">Elija una modalidad de registro:</p>
+                    <button class="btn-neon-blue" onclick="location.href='registrar.html'"><i class="fas fa-keyboard"></i> Registro Manual</button>
+                    <button class="btn-neon-blue" onclick="location.href='registrarauto.html'"><i class="fas fa-robot"></i> Registro Automático</button>
+                    <button class="btn-logout" style="margin-top:25px; border:none; background:transparent;" onclick="closeModal()">Cancelar</button>
+                `;
+            } else {
+                bodyContent.innerHTML = `
+                    <p id="modalBody" style="font-size: 1.1rem; line-height: 1.6; opacity: 0.9; margin-bottom: 2rem;">${body}</p>
+                    <button class="btn-logout" style="background: var(--accent); color: white; border: none; width: auto; padding: 12px 40px;" onclick="closeModal()">Entendido</button>
+                `;
+            }
+            
+            overlay.style.display = 'flex';
         }
 
         function closeModal() {
             document.getElementById('modalOverlay').style.display = 'none';
+            if (currentRedirect && currentRedirect !== 'submenu') {
+                window.location.href = currentRedirect;
+            }
         }
 
-        async function logout() {
-            await _supabase.auth.signOut();
-            window.location.href = 'index.html';
-        }
-
-        // Fondo de partículas (Sparkles)
+        // --- PARTÍCULAS ---
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
         let sparkles = [];
@@ -222,6 +230,8 @@
             requestAnimationFrame(animate);
         }
         animate();
+        
+        document.getElementById('userName').innerText = localStorage.getItem('session_email')?.split('@')[0].toUpperCase() || 'ADMIN';
     </script>
 </body>
 </html>
