@@ -11,13 +11,12 @@
         }
         body { margin: 0; font-family: 'Inter', sans-serif; background: radial-gradient(circle at top right, #111827, #020617); color: white; padding: 20px; min-height: 100vh; }
         
-        /* Stats */
+        /* Layout */
         .dashboard-mini { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: var(--glass); padding: 15px; border-radius: 12px; border: 1px solid var(--border); border-left: 4px solid var(--accent); }
         .stat-label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.6; }
         .stat-value { font-size: 1.5rem; font-weight: 600; }
 
-        /* Form */
         .form-card { background: var(--glass); padding: 25px; border-radius: 20px; border: 1px solid var(--border); display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         .section-header { grid-column: span 12; margin: 15px 0 5px; border-left: 3px solid var(--accent); padding-left: 10px; color: var(--accent); font-size: 0.8rem; text-transform: uppercase; }
         
@@ -25,23 +24,27 @@
         .full-width { grid-column: span 12; }
         
         label { font-size: 0.65rem; opacity: 0.7; font-weight: 600; }
-        input, select, textarea { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white; font-size: 0.85rem; font-family: inherit; }
+        input, select, textarea { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white; font-size: 0.85rem; font-family: inherit; outline: none; transition: 0.3s; }
+        
+        /* Validaciones Visuales */
+        .invalid-field { border-color: var(--danger) !important; box-shadow: 0 0 8px rgba(239, 68, 68, 0.2); }
+        .valid-field { border-color: var(--success) !important; box-shadow: 0 0 8px rgba(74, 222, 128, 0.2); }
+        
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); }
         input[readonly] { background: rgba(255,255,255,0.02); color: #60a5fa; cursor: not-allowed; border-style: dashed; }
-        .solicitud-input { border: 1.5px solid var(--danger); color: var(--danger); }
+        
+        .obligatorio { border: 1.5px solid var(--accent); }
+        .solicitud-input { border: 1.5px solid var(--danger); }
 
         .btn-search-sigla { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 5px; }
 
-        /* Modales */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .modal-content { background: #0f172a; padding: 25px; border-radius: 15px; border: 1px solid var(--accent); width: 450px; text-align: center; }
         
         #listaSiglasEmergente { width: 100%; background: #1e293b; color: white; border: 1px solid var(--border); border-radius: 8px; margin-top: 10px; }
 
-        .btn-registrar { grid-column: span 12; background: var(--accent); color: white; padding: 18px; border-radius: 12px; font-weight: 600; cursor: pointer; border: none; margin-top: 20px; font-size: 1rem; }
+        .btn-registrar { grid-column: span 12; background: var(--success); color: #000; padding: 18px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; margin-top: 20px; font-size: 1rem; }
         
-        /* Switch */
-        .switch-area { grid-column: span 12; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
-
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 3000; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -51,40 +54,45 @@
 
 <div class="container">
     <div class="dashboard-mini">
-        <div class="stat-card"><div class="stat-label">Registros Hoy</div><div class="stat-value">0</div></div>
-        <div class="stat-card" style="border-left-color:var(--danger)"><div class="stat-label">🚨 Vencen Hoy</div><div class="stat-value" style="color:var(--danger)">1</div></div>
-        <div class="stat-card"><div class="stat-label">En Proceso</div><div class="stat-value">11</div></div>
-        <div class="stat-card"><div class="stat-label">Atendidos</div><div class="stat-value">2</div></div>
+        <div class="stat-card"><div class="stat-label">Registros Hoy</div><div class="stat-value">--</div></div>
+        <div class="stat-card" style="border-left-color:var(--danger)"><div class="stat-label">🚨 Vencen Hoy</div><div class="stat-value" style="color:var(--danger)">--</div></div>
+        <div class="stat-card"><div class="stat-label">Seguridad de Datos</div><div class="stat-value" style="color:var(--success); font-size: 1rem;">Activada (21c)</div></div>
+        <div class="stat-card"><div class="stat-label">Motor</div><div class="stat-value" style="font-size: 1rem;">Supabase Cloud</div></div>
     </div>
 
     <div class="form-card">
-        <h2 style="grid-column: span 12; margin:0 0 10px 0;">Registro Maestro <span style="color:var(--accent)">Manual</span></h2>
+        <h2 style="grid-column: span 12; margin:0 0 10px 0;">Registro Maestro <span style="color:var(--accent)">Metax Manual</span></h2>
 
         <div class="section-header">1. Identificadores y Emisor</div>
-        <div class="input-box"><label>Consecutivo</label><input type="text" id="cons" readonly></div>
-        <div class="input-box"><label>Folio Entrada</label><input type="text" id="fe" readonly></div>
-        <div class="input-box"><label>Folio Interno CSF</label><input type="text" id="f_int"></div>
-        <div class="input-box"><label style="color:var(--danger)">Oficio de Solicitud</label><input type="text" id="of_sol" class="solicitud-input"></div>
+        <div class="input-box"><label>Consecutivo (Auto)</label><input type="text" id="cons" readonly></div>
+        <div class="input-box"><label>Folio Entrada (Auto)</label><input type="text" id="fe" readonly></div>
+        <div class="input-box"><label>Folio Interno CSF *</label><input type="text" id="f_int" class="obligatorio"></div>
+        <div class="input-box"><label style="color:var(--danger)">Oficio de Solicitud *</label><input type="text" id="of_sol" class="solicitud-input"></div>
 
-        <div class="input-box col-4">
-            <label>Siglas Emisor</label>
-            <input type="text" id="sigla_display" readonly placeholder="Haga clic para buscar..." onclick="abrirSelector()" style="cursor:pointer; border-color:var(--accent); background:rgba(59,130,246,0.1)">
+        <div class="input-box" style="grid-column: span 4">
+            <label>Siglas Emisor *</label>
+            <input type="text" id="sigla_display" readonly placeholder="Click para buscar..." onclick="abrirSelector()" style="cursor:pointer; border-color:var(--accent)">
             <button class="btn-search-sigla" onclick="abrirSelector()">🔍 Buscar Sigla</button>
         </div>
-        <div class="input-box col-4"><label>Dependencia</label><input type="text" id="dep" readonly></div>
-        <div class="input-box col-2"><label>Firmante</label><input type="text" id="fir" readonly></div>
-        <div class="input-box col-2"><label>Cargo</label><input type="text" id="car" readonly></div>
+        <div class="input-box" style="grid-column: span 6"><label>Dependencia / Ente</label><input type="text" id="dep" readonly></div>
+        <div class="input-box" style="grid-column: span 2">
+            <label>Estatus</label>
+            <select id="estatus">
+                <option value="Pendiente">Pendiente</option>
+                <option value="En Proceso">En Proceso</option>
+                <option value="Atendido">Atendido</option>
+            </select>
+        </div>
 
-        <div class="section-header">2. Detalles del Documento y Gestión</div>
-        <div class="input-box"><label>No. Oficio Emisor</label><input type="text" id="n_ofi"></div>
-        <div class="input-box"><label>Fecha Documento</label><input type="date" id="f_doc"></div>
+        <div class="section-header">2. Detalles de Gestión y Medios</div>
         
         <div class="input-box">
-            <label>⚖️ Tipo de Gestión</label>
+            <label>🧮 Tipo de Gestión</label>
             <select id="tipoGestion">
                 <option value="Administrativo">📂 Administrativo</option>
                 <option value="Técnico">🛠️ Técnico / Operativo</option>
                 <option value="Legal">⚖️ Legal / Jurídico</option>
+                <option value="Archivo">🗃️ Archivo / Conocimiento</option>
                 <option value="Urgente">🚨 Asunto Urgente</option>
             </select>
         </div>
@@ -97,53 +105,49 @@
                 <option value="DVD 4.5 GB">📀 DVD - 4.5 GB</option>
                 <option value="USB 16 GB">⚡ USB - 16 GB</option>
                 <option value="USB 32 GB">⚡ USB - 32 GB</option>
-                <option value="Otro">🛠️ Otro (Especificar)</option>
+                <option value="Otro">📦 Otro (Especificar)</option>
             </select>
         </div>
 
-        <div class="input-box full-width" id="especificarOtroBox" style="display:none">
-            <label>🔍 Especificar Dispositivo</label>
-            <input type="text" id="otroDetalle" placeholder="Describa el dispositivo...">
+        <div class="input-box" id="especificarOtroBox" style="display:none; grid-column: span 6;">
+            <label>🔍 Describa el Dispositivo</label>
+            <input type="text" id="otroDetalle" placeholder="Ej: Memoria SD">
         </div>
+
+        <div class="input-box"><label>Fecha Documento</label><input type="date" id="f_doc"></div>
+
+        <div class="section-header">3. Responsables y Asunto Detallado</div>
+        <div class="input-box" style="grid-column: span 4"><label>Nombre del Firmante</label><input type="text" id="fir"></div>
+        <div class="input-box" style="grid-column: span 4"><label>Cargo</label><input type="text" id="car"></div>
+        <div class="input-box" style="grid-column: span 4"><label>Oficio de Respuesta</label><input type="text" id="ofi_atiende"></div>
 
         <div class="input-box full-width">
-            <label>📝 Asunto / Extracto</label>
-            <textarea id="asunto" rows="3" placeholder="Descripción breve..."></textarea>
-        </div>
-
-        <div class="section-header">3. Control de Folios (YEPRI-INN)</div>
-        <div class="switch-area">
-            <div>
-                <strong>¿Generar Folios de Salida (S-OFA)?</strong>
-                <small style="display:block; opacity:0.5">Vincular serie de salida automáticamente.</small>
-            </div>
-            <div style="display:flex; gap:10px; align-items:center">
-                <input type="checkbox" id="checkSalida" style="width:20px;height:20px">
-                <input type="number" id="cantSalidas" value="1" min="1" style="width:60px; text-align:center">
+            <label>📝 Asunto / Extracto (Obligatorio - Mínimo 21 caracteres) *</label>
+            <textarea id="asunto" rows="3" placeholder="Redacte el asunto aquí..." class="invalid-field"></textarea>
+            <div style="display:flex; justify-content: space-between; margin-top: 5px;">
+                <small id="charCount" style="font-size: 0.7rem; color: var(--danger);">Caracteres: 0 / 21</small>
+                <small id="valMsg" style="font-size: 0.7rem; color: var(--danger);">Texto insuficiente</small>
             </div>
         </div>
 
-        <button class="btn-registrar" id="btnSave" onclick="ejecutarGuardado()">Finalizar y Registrar en Supabase</button>
+        <button class="btn-registrar" id="btnSave" onclick="ejecutarGuardado()">FINALIZAR Y REGISTRAR EN NUBE</button>
     </div>
 </div>
 
 <div id="modalSiglas" class="modal">
     <div class="modal-content">
-        <h3>Seleccionar Sigla</h3>
+        <h3>Directorio de Siglas</h3>
         <input type="text" id="txtFiltro" placeholder="Filtrar..." oninput="filtrarEmergente(this.value)" style="width:100%; margin-bottom:10px; box-sizing:border-box">
         <select id="listaSiglasEmergente" size="10" onchange="seleccionarDeModal(this.value)"></select>
-        <button onclick="cerrarSelector()" style="width:100%; margin-top:15px; background:var(--danger); color:white; border:none; padding:10px; border-radius:8px">Cancelar</button>
+        <button onclick="cerrarSelector()" style="width:100%; margin-top:15px; background:var(--danger); color:white; border:none; padding:10px; border-radius:8px; cursor:pointer">Cerrar</button>
     </div>
 </div>
 
 <div id="modalResumen" class="modal">
     <div class="modal-content" style="border-color:var(--success)">
         <h3 style="color:var(--success)">¡Registro Exitoso!</h3>
-        <div id="resumenTexto" style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; text-align:left; font-family:monospace; font-size:0.9rem; margin-bottom:15px; color:var(--accent)"></div>
-        <div style="display:flex; gap:10px">
-            <button onclick="copiarResumen()" style="flex:1; padding:12px; background:var(--glass); color:white; border:1px solid var(--border); border-radius:8px; cursor:pointer">📋 Copiar</button>
-            <button onclick="location.reload()" style="flex:1; padding:12px; background:var(--success); color:black; border:none; border-radius:8px; cursor:pointer; font-weight:600">Finalizar</button>
-        </div>
+        <div id="resumenTexto" style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; text-align:left; font-family:monospace; margin-bottom:15px; color:#4ade80"></div>
+        <button onclick="location.reload()" style="width:100%; padding:12px; background:var(--success); color:black; border:none; border-radius:8px; cursor:pointer; font-weight:700">Finalizar</button>
     </div>
 </div>
 
@@ -151,16 +155,33 @@
 <script>
     const _supabase = supabase.createClient('https://zfztocmwphjfrabvbzlb.supabase.co', 'sb_publishable_cbOD6KTnjsGacu_GnAQm8g_nMuIoOIg');
     let dataCache = [];
-    let textoParaCopiar = "";
+
+    // LÓGICA DE VALIDACIÓN DINÁMICA DEL ASUNTO
+    document.getElementById('asunto').addEventListener('input', function() {
+        const len = this.value.trim().length;
+        const countLabel = document.getElementById('charCount');
+        const msgLabel = document.getElementById('valMsg');
+        
+        countLabel.innerText = `Caracteres: ${len} / 21`;
+        
+        if(len >= 21) {
+            this.classList.remove('invalid-field');
+            this.classList.add('valid-field');
+            countLabel.style.color = 'var(--success)';
+            msgLabel.style.color = 'var(--success)';
+            msgLabel.innerText = '✅ Longitud correcta';
+        } else {
+            this.classList.remove('valid-field');
+            this.classList.add('invalid-field');
+            countLabel.style.color = 'var(--danger)';
+            msgLabel.style.color = 'var(--danger)';
+            msgLabel.innerText = 'Texto insuficiente';
+        }
+    });
 
     window.onload = async () => {
-        const { data: enlaces } = await _supabase.from('enlacesdirec').select('*').order('sujeto');
-        dataCache = enlaces;
-        const { data: folios } = await _supabase.rpc('generar_folios_duo_seguro');
-        if(folios) {
-            document.getElementById('cons').value = folios[0].consecutivo_num;
-            document.getElementById('fe').value = folios[0].folio_e;
-        }
+        const { data } = await _supabase.from('enlacesdirec').select('siglas, entidad_dep, quien_firma, puesto_firma').order('siglas');
+        dataCache = data || [];
         document.getElementById('loader').style.display = 'none';
     };
 
@@ -169,65 +190,66 @@
     function verificarOtro(v) { document.getElementById('especificarOtroBox').style.display = (v === 'Otro') ? 'flex' : 'none'; }
 
     function filtrarEmergente(t) {
-        const lista = dataCache.filter(i => i.sujeto.toLowerCase().includes(t.toLowerCase()));
+        const lista = dataCache.filter(i => i.siglas.toLowerCase().includes(t.toLowerCase()) || i.entidad_dep.toLowerCase().includes(t.toLowerCase()));
         const sel = document.getElementById('listaSiglasEmergente');
-        sel.innerHTML = lista.map(i => `<option value="${i.sujeto}">${i.sujeto} - ${i.entidad.substring(0,40)}...</option>`).join('');
+        sel.innerHTML = lista.map(i => `<option value="${i.siglas}">${i.siglas} - ${i.entidad_dep.substring(0,40)}...</option>`).join('');
     }
 
     function seleccionarDeModal(val) {
-        const item = dataCache.find(i => i.sujeto === val);
+        const item = dataCache.find(i => i.siglas === val);
         if(item) {
-            document.getElementById('sigla_display').value = item.sujeto;
-            document.getElementById('dep').value = item.entidad;
-            document.getElementById('fir').value = item.enlace;
-            document.getElementById('car').value = item.puesto;
+            document.getElementById('sigla_display').value = item.siglas;
+            document.getElementById('dep').value = item.entidad_dep;
+            document.getElementById('fir').value = item.quien_firma || '';
+            document.getElementById('car').value = item.puesto_firma || '';
             cerrarSelector();
         }
     }
 
     async function ejecutarGuardado() {
         const btn = document.getElementById('btnSave');
+        const f_int = document.getElementById('f_int').value.trim();
         const sigla = document.getElementById('sigla_display').value;
-        if(!sigla || !document.getElementById('asunto').value) return alert("Faltan datos.");
+        const of_sol = document.getElementById('of_sol').value.trim();
+        const asunto = document.getElementById('asunto').value.trim();
 
-        btn.disabled = true; btn.innerText = "Registrando...";
+        // Validaciones finales
+        if(!f_int || !sigla || !of_sol) return alert("⚠️ Faltan campos obligatorios (Marcados con *).");
+        if(asunto.length < 21) return alert("⚠️ El Asunto debe contener al menos 21 caracteres.");
+
+        btn.disabled = true; btn.innerText = "Sincronizando...";
+
         try {
-            const c = document.getElementById('cons').value;
-            const f = document.getElementById('fe').value;
-            
-            // 1. Base
-            await _supabase.from('correspondencias').insert([{
-                consecutivo: c, folio_entrada: f, siglas_emisor: sigla, 
-                asunto: document.getElementById('asunto').value,
-                oficio_solicitud: document.getElementById('of_sol').value
+            const { data: lastEntry } = await _supabase.from('correspondencias').select('conse_regis, OFA_E').order('conse_regis', { ascending: false }).limit(1).maybeSingle();
+            const n_conse = (lastEntry?.conse_regis || 0) + 1;
+            const n_fe = (lastEntry?.OFA_E || 0) + 1;
+
+            const dispoFinal = document.getElementById('tipoDispositivo').value === 'Otro' ? 
+                               document.getElementById('otroDetalle').value : 
+                               document.getElementById('tipoDispositivo').value;
+
+            const { error } = await _supabase.from('correspondencias').insert([{
+                conse_regis: n_conse,
+                OFA_E: n_fe,
+                folio_inter: f_int,
+                num_oficio_ingresar: of_sol,
+                siglas_emis: sigla,
+                entidad_dep: document.getElementById('dep').value,
+                quien_firma: document.getElementById('fir').value,
+                puesto_firma: document.getElementById('car').value,
+                ofi_firmante: document.getElementById('ofi_atiende').value,
+                tipo_dispo: dispoFinal,
+                accion_realizar: document.getElementById('tipoGestion').value,
+                estatus: document.getElementById('estatus').value,
+                asunto_firma: asunto
             }]);
-            await _supabase.from('folios_entrada').insert([{ consecutivo: c, ofa_e_folio: f, origen: sigla }]);
 
-            // 2. Resumen
-            let resHtml = `FOLIO ENTRADA: ${f}<br>`;
-            textoParaCopiar = `ENTRADA: ${f}\n`;
+            if(error) throw error;
 
-            // 3. Salidas
-            if(document.getElementById('checkSalida').checked) {
-                const n = parseInt(document.getElementById('cantSalidas').value);
-                const salidas = [];
-                for(let i=1; i<=n; i++) {
-                    const fs = `S-OFA-` + i.toString().padStart(4, '0');
-                    salidas.push({ consecutivo_madre: c, ofa_s_folio: fs });
-                    resHtml += `• SALIDA: ${fs}<br>`;
-                    textoParaCopiar += `SALIDA: ${fs}\n`;
-                }
-                await _supabase.from('folios_salida').insert(salidas);
-            }
-
-            document.getElementById('resumenTexto').innerHTML = resHtml;
+            document.getElementById('resumenTexto').innerHTML = `CONSECUTIVO: ${n_conse}<br>FOLIO ENTRADA: ${n_fe}<br>ASUNTO: REGISTRADO ✅`;
             document.getElementById('modalResumen').style.display = 'flex';
-        } catch(e) { alert(e.message); btn.disabled = false; }
-    }
 
-    function copiarResumen() {
-        navigator.clipboard.writeText(textoParaCopiar);
-        alert("Folios copiados!");
+        } catch(e) { alert("Error Supabase: " + e.message); btn.disabled = false; btn.innerText = "Reintentar"; }
     }
 </script>
 </body>
