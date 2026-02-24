@@ -2,242 +2,232 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registro Maestro Pro | YEPRI-INN</title>
+    <title>Registro Maestro | YEPRI-INN METAX</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --accent: #3b82f6;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.12);
-            --bg: #020617;
-            --success: #4ade80;
-            --danger: #ef4444;
+            --accent: #3b82f6; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.12);
+            --bg: #020617; --success: #4ade80; --danger: #ef4444;
         }
-
-        body {
-            margin: 0; font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at top right, #111827, #020617);
-            color: white; min-height: 100vh; padding: 20px;
-        }
-
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .spinner { width: 40px; height: 40px; border: 3px solid var(--glass); border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .container { max-width: 1200px; margin: 0 auto; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: radial-gradient(circle at top right, #111827, #020617); color: white; padding: 20px; min-height: 100vh; }
         
-        /* Dashboard Stats */
-        .dashboard-mini {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;
-        }
-        .stat-card {
-            background: var(--glass); padding: 15px; border-radius: 12px; border: 1px solid var(--border);
-            border-left: 4px solid var(--accent);
-        }
-        .stat-card.red { border-left-color: var(--danger); }
-        .stat-label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.6; letter-spacing: 1px; }
-        .stat-value { font-size: 1.5rem; font-weight: 600; margin-top: 5px; }
+        /* Stats */
+        .dashboard-mini { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: var(--glass); padding: 15px; border-radius: 12px; border: 1px solid var(--border); border-left: 4px solid var(--accent); }
+        .stat-label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.6; }
+        .stat-value { font-size: 1.5rem; font-weight: 600; }
 
-        /* Formulario */
-        .section-header { 
-            grid-column: span 12; margin: 20px 0 10px; padding-left: 10px;
-            border-left: 3px solid var(--accent); font-size: 0.8rem; text-transform: uppercase; color: var(--accent);
-        }
-
-        .form-card {
-            background: var(--glass); padding: 25px; border-radius: 20px; border: 1px solid var(--border);
-            display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px;
-        }
-
+        /* Form */
+        .form-card { background: var(--glass); padding: 25px; border-radius: 20px; border: 1px solid var(--border); display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .section-header { grid-column: span 12; margin: 15px 0 5px; border-left: 3px solid var(--accent); padding-left: 10px; color: var(--accent); font-size: 0.8rem; text-transform: uppercase; }
+        
         .input-box { display: flex; flex-direction: column; gap: 5px; grid-column: span 3; }
-        .col-2 { grid-column: span 2; }
-        .col-4 { grid-column: span 4; }
-        .col-6 { grid-column: span 6; }
-        .col-12 { grid-column: span 12; }
-
-        label { font-size: 0.65rem; opacity: 0.7; font-weight: 600; text-transform: uppercase; }
-
-        input, select, textarea {
-            background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border);
-            padding: 10px; border-radius: 8px; color: white; font-family: inherit; font-size: 0.85rem;
-        }
-        input:focus { border-color: var(--accent); outline: none; }
-        input[readonly] { background: rgba(255,255,255,0.02); color: #60a5fa; cursor: not-allowed; border-style: dashed; }
+        .full-width { grid-column: span 12; }
         
-        .solicitud-input { border: 1px solid var(--danger); color: var(--danger); font-weight: 600; }
+        label { font-size: 0.65rem; opacity: 0.7; font-weight: 600; }
+        input, select, textarea { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white; font-size: 0.85rem; font-family: inherit; }
+        input[readonly] { background: rgba(255,255,255,0.02); color: #60a5fa; cursor: not-allowed; border-style: dashed; }
+        .solicitud-input { border: 1.5px solid var(--danger); color: var(--danger); }
 
-        .search-container {
-            background: rgba(59, 130, 246, 0.08); padding: 12px; border-radius: 12px; border: 1px solid var(--accent);
-        }
+        .btn-search-sigla { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 5px; }
 
-        .btn-registrar {
-            grid-column: span 12; background: var(--accent); color: white; border: none;
-            padding: 16px; border-radius: 10px; font-weight: 600; cursor: pointer; margin-top: 10px;
-        }
+        /* Modales */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-content { background: #0f172a; padding: 25px; border-radius: 15px; border: 1px solid var(--accent); width: 450px; text-align: center; }
+        
+        #listaSiglasEmergente { width: 100%; background: #1e293b; color: white; border: 1px solid var(--border); border-radius: 8px; margin-top: 10px; }
 
-        #modalResumen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px);
-        }
-        .modal-content { background: #0f172a; padding: 30px; border-radius: 20px; border: 1px solid var(--accent); width: 400px; text-align: center; }
+        .btn-registrar { grid-column: span 12; background: var(--accent); color: white; padding: 18px; border-radius: 12px; font-weight: 600; cursor: pointer; border: none; margin-top: 20px; font-size: 1rem; }
+        
+        /* Switch */
+        .switch-area { grid-column: span 12; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
+
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 3000; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-<div id="loader">
-    <div class="spinner"></div>
-    <p>Sincronizando con YEPRI-INN...</p>
-</div>
+<div id="loader"><div style="width:40px;height:40px;border:4px solid var(--glass);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;"></div></div>
 
 <div class="container">
     <div class="dashboard-mini">
         <div class="stat-card"><div class="stat-label">Registros Hoy</div><div class="stat-value">0</div></div>
-        <div class="stat-card red"><div class="stat-label">🚨 Vencen Hoy</div><div class="stat-value">1</div></div>
+        <div class="stat-card" style="border-left-color:var(--danger)"><div class="stat-label">🚨 Vencen Hoy</div><div class="stat-value" style="color:var(--danger)">1</div></div>
         <div class="stat-card"><div class="stat-label">En Proceso</div><div class="stat-value">11</div></div>
         <div class="stat-card"><div class="stat-label">Atendidos</div><div class="stat-value">2</div></div>
     </div>
 
     <div class="form-card">
-        <h2 style="grid-column: span 12; margin: 0 0 10px 0; font-weight: 300;">Registro Maestro <span style="color:var(--accent)">Manual</span></h2>
+        <h2 style="grid-column: span 12; margin:0 0 10px 0;">Registro Maestro <span style="color:var(--accent)">Manual</span></h2>
 
-        <div class="section-header">1. Identificadores del Registro</div>
-        <div class="input-box"><label>Consecutivo</label><input type="text" id="consecutivo" readonly></div>
-        <div class="input-box"><label>Folio Entrada (OFA-A)</label><input type="text" id="folio_e" readonly></div>
-        <div class="input-box"><label>Folio Interno CSF</label><input type="text" id="folio_interno"></div>
-        <div class="input-box"><label style="color:var(--danger)">Oficio de Solicitud</label><input type="text" id="oficio_solicitud" class="solicitud-input" placeholder="Ingresar folio..."></div>
+        <div class="section-header">1. Identificadores y Emisor</div>
+        <div class="input-box"><label>Consecutivo</label><input type="text" id="cons" readonly></div>
+        <div class="input-box"><label>Folio Entrada</label><input type="text" id="fe" readonly></div>
+        <div class="input-box"><label>Folio Interno CSF</label><input type="text" id="f_int"></div>
+        <div class="input-box"><label style="color:var(--danger)">Oficio de Solicitud</label><input type="text" id="of_sol" class="solicitud-input"></div>
 
-        <div class="section-header">2. Información Técnica del Oficio</div>
-        <div class="input-box col-2"><label>No. Oficio Emisor</label><input type="text" id="num_oficio_remitente"></div>
-        <div class="input-box col-2"><label>Fecha Recepción</label><input type="date" id="fecha_recepcion" value="2026-02-24"></div>
-        <div class="input-box col-2"><label>Medio</label><select id="medio"><option>Impreso (Físico)</option><option>Digital (Correo)</option></select></div>
-        <div class="input-box col-2"><label>Tipo Dispositivo</label><select id="tipo_dispositivo"><option>Ninguno</option><option>USB</option><option>CD/DVD</option></select></div>
-        <div class="input-box col-2"><label>Cap. Info</label><input type="number" id="cap_info" value="0"></div>
-        <div class="input-box col-2"><label>Unidad Medida</label><select id="unidad_medida"><option>N/A</option><option>MB</option><option>GB</option></select></div>
-
-        <div class="section-header">3. Emisor y Seguimiento</div>
-        <div class="input-box col-4 search-container">
-            <label>🔍 Buscar Sigla Emisor</label>
-            <input type="text" id="busqueda" placeholder="Filtrar..." oninput="filtrarSiglas(this.value)">
-            <select id="siglasEmisor" size="4" style="margin-top:5px" onchange="autoLlenarCampos(this.value)"></select>
-            <small style="color:#fbbf24; font-size:10px">⚠️ Debe seleccionar de la lista</small>
+        <div class="input-box col-4">
+            <label>Siglas Emisor</label>
+            <input type="text" id="sigla_display" readonly placeholder="Haga clic para buscar..." onclick="abrirSelector()" style="cursor:pointer; border-color:var(--accent); background:rgba(59,130,246,0.1)">
+            <button class="btn-search-sigla" onclick="abrirSelector()">🔍 Buscar Sigla</button>
         </div>
-        <div class="input-box col-4"><label>Dependencia / Ente</label><input type="text" id="dependencia" readonly></div>
-        <div class="input-box col-2"><label>Firmante</label><input type="text" id="firmante" readonly></div>
-        <div class="input-box col-2"><label>Cargo</label><input type="text" id="puesto" readonly></div>
+        <div class="input-box col-4"><label>Dependencia</label><input type="text" id="dep" readonly></div>
+        <div class="input-box col-2"><label>Firmante</label><input type="text" id="fir" readonly></div>
+        <div class="input-box col-2"><label>Cargo</label><input type="text" id="car" readonly></div>
+
+        <div class="section-header">2. Detalles del Documento y Gestión</div>
+        <div class="input-box"><label>No. Oficio Emisor</label><input type="text" id="n_ofi"></div>
+        <div class="input-box"><label>Fecha Documento</label><input type="date" id="f_doc"></div>
         
-        <div class="input-box col-6"><label>Oficio que Atiende</label><input type="text" id="oficio_atiende"></div>
-        <div class="input-box col-6"><label>Fecha Vencimiento</label><input type="date" id="fecha_vencimiento" value="2026-03-02"></div>
+        <div class="input-box">
+            <label>⚖️ Tipo de Gestión</label>
+            <select id="tipoGestion">
+                <option value="Administrativo">📂 Administrativo</option>
+                <option value="Técnico">🛠️ Técnico / Operativo</option>
+                <option value="Legal">⚖️ Legal / Jurídico</option>
+                <option value="Urgente">🚨 Asunto Urgente</option>
+            </select>
+        </div>
 
-        <div class="section-header">4. Acciones y Asunto</div>
-        <div class="input-box col-4"><label>Acción</label><select id="accion"><option>Para respuesta</option><option>Para conocimiento</option></select></div>
-        <div class="input-box col-4"><label>Salidas (S-OFA)</label><input type="number" id="cantSalidas" value="0" min="0"></div>
-        <div class="input-box col-4"><label>Estatus</label><select id="estatus"><option>Recibido</option><option>En Proceso</option></select></div>
-        <div class="input-box col-12"><label>Asunto</label><textarea id="asunto" rows="3"></textarea></div>
+        <div class="input-box">
+            <label>💾 Tipo de Dispositivo</label>
+            <select id="tipoDispositivo" onchange="verificarOtro(this.value)">
+                <option value="N/A">🚫 Ninguno</option>
+                <option value="CD 700 MB">💿 CD - 700 MB</option>
+                <option value="DVD 4.5 GB">📀 DVD - 4.5 GB</option>
+                <option value="USB 16 GB">⚡ USB - 16 GB</option>
+                <option value="USB 32 GB">⚡ USB - 32 GB</option>
+                <option value="Otro">🛠️ Otro (Especificar)</option>
+            </select>
+        </div>
 
-        <button class="btn-registrar" id="btnMain" onclick="ejecutarRegistroGlobal()">Finalizar y Registrar en Supabase</button>
+        <div class="input-box full-width" id="especificarOtroBox" style="display:none">
+            <label>🔍 Especificar Dispositivo</label>
+            <input type="text" id="otroDetalle" placeholder="Describa el dispositivo...">
+        </div>
+
+        <div class="input-box full-width">
+            <label>📝 Asunto / Extracto</label>
+            <textarea id="asunto" rows="3" placeholder="Descripción breve..."></textarea>
+        </div>
+
+        <div class="section-header">3. Control de Folios (YEPRI-INN)</div>
+        <div class="switch-area">
+            <div>
+                <strong>¿Generar Folios de Salida (S-OFA)?</strong>
+                <small style="display:block; opacity:0.5">Vincular serie de salida automáticamente.</small>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center">
+                <input type="checkbox" id="checkSalida" style="width:20px;height:20px">
+                <input type="number" id="cantSalidas" value="1" min="1" style="width:60px; text-align:center">
+            </div>
+        </div>
+
+        <button class="btn-registrar" id="btnSave" onclick="ejecutarGuardado()">Finalizar y Registrar en Supabase</button>
     </div>
 </div>
 
-<div id="modalResumen">
+<div id="modalSiglas" class="modal">
     <div class="modal-content">
+        <h3>Seleccionar Sigla</h3>
+        <input type="text" id="txtFiltro" placeholder="Filtrar..." oninput="filtrarEmergente(this.value)" style="width:100%; margin-bottom:10px; box-sizing:border-box">
+        <select id="listaSiglasEmergente" size="10" onchange="seleccionarDeModal(this.value)"></select>
+        <button onclick="cerrarSelector()" style="width:100%; margin-top:15px; background:var(--danger); color:white; border:none; padding:10px; border-radius:8px">Cancelar</button>
+    </div>
+</div>
+
+<div id="modalResumen" class="modal">
+    <div class="modal-content" style="border-color:var(--success)">
         <h3 style="color:var(--success)">¡Registro Exitoso!</h3>
-        <div id="listaFolios" style="background:rgba(0,0,0,0.4); padding:15px; border-radius:10px; text-align:left; margin:15px 0; font-family:monospace; color:var(--accent);"></div>
-        <button onclick="location.reload()" style="width:100%; padding:12px; border-radius:8px; cursor:pointer; background:var(--accent); color:white; border:none;">Finalizar</button>
+        <div id="resumenTexto" style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; text-align:left; font-family:monospace; font-size:0.9rem; margin-bottom:15px; color:var(--accent)"></div>
+        <div style="display:flex; gap:10px">
+            <button onclick="copiarResumen()" style="flex:1; padding:12px; background:var(--glass); color:white; border:1px solid var(--border); border-radius:8px; cursor:pointer">📋 Copiar</button>
+            <button onclick="location.reload()" style="flex:1; padding:12px; background:var(--success); color:black; border:none; border-radius:8px; cursor:pointer; font-weight:600">Finalizar</button>
+        </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     const _supabase = supabase.createClient('https://zfztocmwphjfrabvbzlb.supabase.co', 'sb_publishable_cbOD6KTnjsGacu_GnAQm8g_nMuIoOIg');
-    let todasLasSiglas = [];
+    let dataCache = [];
+    let textoParaCopiar = "";
 
     window.onload = async () => {
         const { data: enlaces } = await _supabase.from('enlacesdirec').select('*').order('sujeto');
-        if (enlaces) { todasLasSiglas = enlaces; renderizarOpciones(enlaces); }
-        
+        dataCache = enlaces;
         const { data: folios } = await _supabase.rpc('generar_folios_duo_seguro');
         if(folios) {
-            document.getElementById('consecutivo').value = folios[0].consecutivo_num;
-            document.getElementById('folio_e').value = folios[0].folio_e;
+            document.getElementById('cons').value = folios[0].consecutivo_num;
+            document.getElementById('fe').value = folios[0].folio_e;
         }
         document.getElementById('loader').style.display = 'none';
     };
 
-    function renderizarOpciones(lista) {
-        const select = document.getElementById('siglasEmisor');
-        select.innerHTML = lista.map(item => `<option value="${item.sujeto}">${item.sujeto} | ${item.entidad}</option>`).join('');
+    function abrirSelector() { document.getElementById('modalSiglas').style.display = 'flex'; filtrarEmergente(''); }
+    function cerrarSelector() { document.getElementById('modalSiglas').style.display = 'none'; }
+    function verificarOtro(v) { document.getElementById('especificarOtroBox').style.display = (v === 'Otro') ? 'flex' : 'none'; }
+
+    function filtrarEmergente(t) {
+        const lista = dataCache.filter(i => i.sujeto.toLowerCase().includes(t.toLowerCase()));
+        const sel = document.getElementById('listaSiglasEmergente');
+        sel.innerHTML = lista.map(i => `<option value="${i.sujeto}">${i.sujeto} - ${i.entidad.substring(0,40)}...</option>`).join('');
     }
 
-    function filtrarSiglas(t) {
-        renderizarOpciones(todasLasSiglas.filter(i => i.sujeto.toLowerCase().includes(t.toLowerCase())));
-    }
-
-    function autoLlenarCampos(s) {
-        const reg = todasLasSiglas.find(i => i.sujeto === s);
-        if (reg) {
-            document.getElementById('dependencia').value = reg.entidad;
-            document.getElementById('firmante').value = reg.enlace;
-            document.getElementById('puesto').value = reg.puesto;
+    function seleccionarDeModal(val) {
+        const item = dataCache.find(i => i.sujeto === val);
+        if(item) {
+            document.getElementById('sigla_display').value = item.sujeto;
+            document.getElementById('dep').value = item.entidad;
+            document.getElementById('fir').value = item.enlace;
+            document.getElementById('car').value = item.puesto;
+            cerrarSelector();
         }
     }
 
-    async function ejecutarRegistroGlobal() {
-        const sigla = document.getElementById('siglasEmisor').value;
-        const asunto = document.getElementById('asunto').value;
-        if (!sigla || !asunto) return alert("Error: Seleccione sigla y escriba el asunto.");
+    async function ejecutarGuardado() {
+        const btn = document.getElementById('btnSave');
+        const sigla = document.getElementById('sigla_display').value;
+        if(!sigla || !document.getElementById('asunto').value) return alert("Faltan datos.");
 
-        const btn = document.getElementById('btnMain');
-        btn.disabled = true; btn.innerText = "Procesando...";
-
+        btn.disabled = true; btn.innerText = "Registrando...";
         try {
-            const cons = document.getElementById('consecutivo').value;
-            const fe = document.getElementById('folio_e').value;
-
-            // 1. Insertar Correspondencia (TODOS LOS CAMPOS DE LA IMAGEN)
-            const { error: err1 } = await _supabase.from('correspondencias').insert([{
-                consecutivo: cons,
-                folio_entrada: fe,
-                folio_interno_csf: document.getElementById('folio_interno').value,
-                oficio_solicitud: document.getElementById('oficio_solicitud').value,
-                num_oficio_remitente: document.getElementById('num_oficio_remitente').value,
-                fecha_recepcion: document.getElementById('fecha_recepcion').value,
-                medio_recepcion: document.getElementById('medio').value,
-                tipo_dispositivo: document.getElementById('tipo_dispositivo').value,
-                capacidad_info: document.getElementById('cap_info').value,
-                unidad_medida: document.getElementById('unidad_medida').value,
-                siglas_emisor: sigla,
-                dependencia: document.getElementById('dependencia').value,
-                firmante: document.getElementById('firmante').value,
-                cargo: document.getElementById('puesto').value,
-                oficio_que_atiende: document.getElementById('oficio_atiende').value,
-                fecha_vencimiento: document.getElementById('fecha_vencimiento').value,
-                accion: document.getElementById('accion').value,
-                estatus: document.getElementById('estatus').value,
-                asunto: asunto
+            const c = document.getElementById('cons').value;
+            const f = document.getElementById('fe').value;
+            
+            // 1. Base
+            await _supabase.from('correspondencias').insert([{
+                consecutivo: c, folio_entrada: f, siglas_emisor: sigla, 
+                asunto: document.getElementById('asunto').value,
+                oficio_solicitud: document.getElementById('of_sol').value
             }]);
-            if (err1) throw err1;
+            await _supabase.from('folios_entrada').insert([{ consecutivo: c, ofa_e_folio: f, origen: sigla }]);
 
-            // 2. Insertar Folio Entrada
-            await _supabase.from('folios_entrada').insert([{ consecutivo: cons, ofa_e_folio: fe, origen: sigla }]);
+            // 2. Resumen
+            let resHtml = `FOLIO ENTRADA: ${f}<br>`;
+            textoParaCopiar = `ENTRADA: ${f}\n`;
 
             // 3. Salidas
-            const n = parseInt(document.getElementById('cantSalidas').value);
-            if (n > 0) {
+            if(document.getElementById('checkSalida').checked) {
+                const n = parseInt(document.getElementById('cantSalidas').value);
                 const salidas = [];
-                for (let i = 1; i <= n; i++) {
-                    salidas.push({ consecutivo_madre: cons, ofa_s_folio: `S-OFA-` + i.toString().padStart(4, '0') });
+                for(let i=1; i<=n; i++) {
+                    const fs = `S-OFA-` + i.toString().padStart(4, '0');
+                    salidas.push({ consecutivo_madre: c, ofa_s_folio: fs });
+                    resHtml += `• SALIDA: ${fs}<br>`;
+                    textoParaCopiar += `SALIDA: ${fs}\n`;
                 }
                 await _supabase.from('folios_salida').insert(salidas);
             }
 
-            document.getElementById('listaFolios').innerHTML = `Folio Entrada: ${fe}<br>Salidas Generadas: ${n}`;
+            document.getElementById('resumenTexto').innerHTML = resHtml;
             document.getElementById('modalResumen').style.display = 'flex';
-        } catch (e) {
-            alert(e.message); btn.disabled = false;
-        }
+        } catch(e) { alert(e.message); btn.disabled = false; }
+    }
+
+    function copiarResumen() {
+        navigator.clipboard.writeText(textoParaCopiar);
+        alert("Folios copiados!");
     }
 </script>
 </body>
