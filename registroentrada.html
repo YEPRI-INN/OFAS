@@ -2,223 +2,243 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registro de Correspondencia | YEPRI-INN</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Registro Maestro Pro | YEPRI-INN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #f1f5f9; --border: #cbd5e1; --text-main: #334155; --accent: #3b82f6; --danger: #ef4444;
+            --accent: #3b82f6;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.12);
+            --bg: #020617;
+            --success: #4ade80;
+            --danger: #ef4444;
         }
-        body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); padding: 30px; }
+
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #111827, #020617);
+            color: white; min-height: 100vh; padding: 20px;
+        }
+
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner { width: 40px; height: 40px; border: 3px solid var(--glass); border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .container { max-width: 1200px; margin: 0 auto; }
         
-        /* Dashboard */
-        .dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
-        .card { background: white; padding: 15px 20px; border-radius: 10px; border-left: 4px solid var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .card.red { border-left-color: var(--danger); }
-        .card-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 5px; }
-        .card-value { font-size: 1.6rem; font-weight: 600; color: #1e293b; }
+        /* Dashboard Stats */
+        .dashboard-mini {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--glass); padding: 15px; border-radius: 12px; border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+        }
+        .stat-card.red { border-left-color: var(--danger); }
+        .stat-label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.6; letter-spacing: 1px; }
+        .stat-value { font-size: 1.5rem; font-weight: 600; margin-top: 5px; }
 
-        /* Estructura Secciones */
-        .section { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; position: relative; }
-        .section-title { position: absolute; top: -10px; left: 15px; background: white; padding: 0 8px; font-size: 0.7rem; font-weight: 900; color: #1e293b; text-transform: uppercase; }
+        /* Formulario */
+        .section-header { 
+            grid-column: span 12; margin: 20px 0 10px; padding-left: 10px;
+            border-left: 3px solid var(--accent); font-size: 0.8rem; text-transform: uppercase; color: var(--accent);
+        }
 
-        .row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; margin-bottom: 12px; }
-        .col-1 { grid-column: span 1; } .col-2 { grid-column: span 2; } .col-3 { grid-column: span 3; } .col-4 { grid-column: span 4; } .col-12 { grid-column: span 12; }
+        .form-card {
+            background: var(--glass); padding: 25px; border-radius: 20px; border: 1px solid var(--border);
+            display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px;
+        }
 
-        .group { display: flex; flex-direction: column; gap: 4px; }
-        label { font-size: 0.65rem; font-weight: 800; color: #1e293b; text-transform: uppercase; }
+        .input-box { display: flex; flex-direction: column; gap: 5px; grid-column: span 3; }
+        .col-2 { grid-column: span 2; }
+        .col-4 { grid-column: span 4; }
+        .col-6 { grid-column: span 6; }
+        .col-12 { grid-column: span 12; }
+
+        label { font-size: 0.65rem; opacity: 0.7; font-weight: 600; text-transform: uppercase; }
+
+        input, select, textarea {
+            background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border);
+            padding: 10px; border-radius: 8px; color: white; font-family: inherit; font-size: 0.85rem;
+        }
+        input:focus { border-color: var(--accent); outline: none; }
+        input[readonly] { background: rgba(255,255,255,0.02); color: #60a5fa; cursor: not-allowed; border-style: dashed; }
         
-        input, select, textarea { border: 1px solid var(--border); padding: 8px 10px; border-radius: 5px; font-size: 0.85rem; color: #334155; outline: none; }
-        input[readonly] { background: #f8fafc; color: #64748b; cursor: not-allowed; }
-        .input-solicitud { border: 1.5px solid var(--danger); color: var(--danger); font-weight: 600; }
+        .solicitud-input { border: 1px solid var(--danger); color: var(--danger); font-weight: 600; }
 
-        .btn-save { float: right; background: #1e293b; color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-save:hover { background: #334155; transform: translateY(-1px); }
-        .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+        .search-container {
+            background: rgba(59, 130, 246, 0.08); padding: 12px; border-radius: 12px; border: 1px solid var(--accent);
+        }
 
-        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        .btn-registrar {
+            grid-column: span 12; background: var(--accent); color: white; border: none;
+            padding: 16px; border-radius: 10px; font-weight: 600; cursor: pointer; margin-top: 10px;
+        }
+
+        #modalResumen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px);
+        }
+        .modal-content { background: #0f172a; padding: 30px; border-radius: 20px; border: 1px solid var(--accent); width: 400px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="loader">
-    <div style="width:35px; height:35px; border:4px solid #f3f3f3; border-top:4px solid #3b82f6; border-radius:50%; animation:spin 1s linear infinite;"></div>
-    <p style="margin-top:15px; font-size:0.75rem; font-weight:700; letter-spacing:1px">SINCRONIZANDO...</p>
+    <div class="spinner"></div>
+    <p>Sincronizando con YEPRI-INN...</p>
 </div>
 
-<div class="dashboard">
-    <div class="card"><div class="card-label">Registros Hoy</div><div class="card-value" id="stats-hoy">0</div></div>
-    <div class="card red"><div class="card-label">🚨 Vencen Hoy</div><div class="card-value" style="color:var(--danger)">1</div></div>
-    <div class="card"><div class="card-label">En Proceso</div><div class="card-value">11</div></div>
-    <div class="card"><div class="card-label">Atendidos</div><div class="card-value">2</div></div>
-</div>
+<div class="container">
+    <div class="dashboard-mini">
+        <div class="stat-card"><div class="stat-label">Registros Hoy</div><div class="stat-value">0</div></div>
+        <div class="stat-card red"><div class="stat-label">🚨 Vencen Hoy</div><div class="stat-value">1</div></div>
+        <div class="stat-card"><div class="stat-label">En Proceso</div><div class="stat-value">11</div></div>
+        <div class="stat-card"><div class="stat-label">Atendidos</div><div class="stat-value">2</div></div>
+    </div>
 
-<div class="section">
-    <span class="section-title">Identificadores del Registro</span>
-    <div class="row">
-        <div class="group col-3"><label>Consecutivo</label><input type="text" id="consecutivo" readonly></div>
-        <div class="group col-3"><label>Folio Entrada (OFA-A)</label><input type="text" id="folio_e" readonly></div>
-        <div class="group col-3"><label>Folio Interno CSF</label><input type="text" id="folio_interno"></div>
-        <div class="group col-3"><label style="color:var(--danger)">Oficio de Solicitud</label><input type="text" id="oficio_solicitud" class="input-solicitud" placeholder="Ingresar folio..."></div>
+    <div class="form-card">
+        <h2 style="grid-column: span 12; margin: 0 0 10px 0; font-weight: 300;">Registro Maestro <span style="color:var(--accent)">Manual</span></h2>
+
+        <div class="section-header">1. Identificadores del Registro</div>
+        <div class="input-box"><label>Consecutivo</label><input type="text" id="consecutivo" readonly></div>
+        <div class="input-box"><label>Folio Entrada (OFA-A)</label><input type="text" id="folio_e" readonly></div>
+        <div class="input-box"><label>Folio Interno CSF</label><input type="text" id="folio_interno"></div>
+        <div class="input-box"><label style="color:var(--danger)">Oficio de Solicitud</label><input type="text" id="oficio_solicitud" class="solicitud-input" placeholder="Ingresar folio..."></div>
+
+        <div class="section-header">2. Información Técnica del Oficio</div>
+        <div class="input-box col-2"><label>No. Oficio Emisor</label><input type="text" id="num_oficio_remitente"></div>
+        <div class="input-box col-2"><label>Fecha Recepción</label><input type="date" id="fecha_recepcion" value="2026-02-24"></div>
+        <div class="input-box col-2"><label>Medio</label><select id="medio"><option>Impreso (Físico)</option><option>Digital (Correo)</option></select></div>
+        <div class="input-box col-2"><label>Tipo Dispositivo</label><select id="tipo_dispositivo"><option>Ninguno</option><option>USB</option><option>CD/DVD</option></select></div>
+        <div class="input-box col-2"><label>Cap. Info</label><input type="number" id="cap_info" value="0"></div>
+        <div class="input-box col-2"><label>Unidad Medida</label><select id="unidad_medida"><option>N/A</option><option>MB</option><option>GB</option></select></div>
+
+        <div class="section-header">3. Emisor y Seguimiento</div>
+        <div class="input-box col-4 search-container">
+            <label>🔍 Buscar Sigla Emisor</label>
+            <input type="text" id="busqueda" placeholder="Filtrar..." oninput="filtrarSiglas(this.value)">
+            <select id="siglasEmisor" size="4" style="margin-top:5px" onchange="autoLlenarCampos(this.value)"></select>
+            <small style="color:#fbbf24; font-size:10px">⚠️ Debe seleccionar de la lista</small>
+        </div>
+        <div class="input-box col-4"><label>Dependencia / Ente</label><input type="text" id="dependencia" readonly></div>
+        <div class="input-box col-2"><label>Firmante</label><input type="text" id="firmante" readonly></div>
+        <div class="input-box col-2"><label>Cargo</label><input type="text" id="puesto" readonly></div>
+        
+        <div class="input-box col-6"><label>Oficio que Atiende</label><input type="text" id="oficio_atiende"></div>
+        <div class="input-box col-6"><label>Fecha Vencimiento</label><input type="date" id="fecha_vencimiento" value="2026-03-02"></div>
+
+        <div class="section-header">4. Acciones y Asunto</div>
+        <div class="input-box col-4"><label>Acción</label><select id="accion"><option>Para respuesta</option><option>Para conocimiento</option></select></div>
+        <div class="input-box col-4"><label>Salidas (S-OFA)</label><input type="number" id="cantSalidas" value="0" min="0"></div>
+        <div class="input-box col-4"><label>Estatus</label><select id="estatus"><option>Recibido</option><option>En Proceso</option></select></div>
+        <div class="input-box col-12"><label>Asunto</label><textarea id="asunto" rows="3"></textarea></div>
+
+        <button class="btn-registrar" id="btnMain" onclick="ejecutarRegistroGlobal()">Finalizar y Registrar en Supabase</button>
     </div>
 </div>
 
-<div class="section">
-    <span class="section-title">Información Técnica del Oficio</span>
-    <div class="row">
-        <div class="group col-2"><label>No. Oficio Emisor</label><input type="text" id="num_oficio_emisor"></div>
-        <div class="group col-2"><label>Fecha Recepción</label><input type="date" id="fecha_recepcion" value="2026-02-24"></div>
-        <div class="group col-2">
-            <label>Medio</label>
-            <select id="medio"><option>Impreso (Físico)</option><option>Digital (Correo)</option></select>
-        </div>
-        <div class="group col-2">
-            <label>Tipo Dispositivo</label>
-            <select id="tipo_dispositivo">
-                <option>Ninguno</option><option>CD</option><option>DVD</option><option>USB 8GB</option><option>USB 16GB</option>
-            </select>
-        </div>
-        <div class="group col-2"><label>Cap. Info</label><input type="number" id="cap_info" value="0"></div>
-        <div class="group col-2">
-            <label>Unidad Medida</label>
-            <select id="unidad_medida"><option>N/A</option><option>MB</option><option>GB</option></select>
-        </div>
+<div id="modalResumen">
+    <div class="modal-content">
+        <h3 style="color:var(--success)">¡Registro Exitoso!</h3>
+        <div id="listaFolios" style="background:rgba(0,0,0,0.4); padding:15px; border-radius:10px; text-align:left; margin:15px 0; font-family:monospace; color:var(--accent);"></div>
+        <button onclick="location.reload()" style="width:100%; padding:12px; border-radius:8px; cursor:pointer; background:var(--accent); color:white; border:none;">Finalizar</button>
     </div>
 </div>
-
-<div class="section">
-    <span class="section-title">Emisor y Seguimiento</span>
-    <div class="row">
-        <div class="group col-3">
-            <label>Siglas Emisor</label>
-            <input type="text" id="search" placeholder="Busque sigla..." oninput="filtrar(this.value)" style="margin-bottom:5px">
-            <select id="siglas" onchange="llenar(this.value)"></select>
-        </div>
-        <div class="group col-3"><label>Dependencia / Ente</label><input type="text" id="dep" readonly></div>
-        <div class="group col-2"><label>Firmante</label><input type="text" id="fir" readonly></div>
-        <div class="group col-2"><label>Cargo</label><input type="text" id="car" readonly></div>
-        <div class="group col-1"><label>Oficio atiende</label><input type="text" id="oficio_atiende"></div>
-        <div class="group col-1"><label>Vencimiento</label><input type="date" id="fecha_vencimiento" value="2026-03-02"></div>
-    </div>
-</div>
-
-<div class="section">
-    <span class="section-title">Acciones y Asunto</span>
-    <div class="row">
-        <div class="group col-4">
-            <label>Acción</label>
-            <select id="accion"><option>Para respuesta</option><option>Para conocimiento</option></select>
-        </div>
-        <div class="group col-4"><label>Salidas (S-OFA)</label><input type="number" id="cant_salidas" value="0"></div>
-        <div class="group col-4">
-            <label>Estatus</label>
-            <select id="estatus"><option>Recibido</option><option>En Proceso</option></select>
-        </div>
-        <div class="group col-12"><label>Asunto</label><textarea id="asunto" rows="3"></textarea></div>
-    </div>
-</div>
-
-<button class="btn-save" id="btnGuardar" onclick="guardarRegistro()">Guardar Registro Manual</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     const _supabase = supabase.createClient('https://zfztocmwphjfrabvbzlb.supabase.co', 'sb_publishable_cbOD6KTnjsGacu_GnAQm8g_nMuIoOIg');
-    let dataCache = [];
+    let todasLasSiglas = [];
 
     window.onload = async () => {
-        try {
-            const { data: enlaces } = await _supabase.from('enlacesdirec').select('*').order('sujeto');
-            dataCache = enlaces;
-            updateCombo(enlaces);
-
-            const { data: folios } = await _supabase.rpc('generar_folios_duo_seguro');
-            if(folios){
-                document.getElementById('consecutivo').value = folios[0].consecutivo_num;
-                document.getElementById('folio_e').value = folios[0].folio_e;
-            }
-            document.getElementById('loader').style.display = 'none';
-        } catch(e) { console.error(e); }
+        const { data: enlaces } = await _supabase.from('enlacesdirec').select('*').order('sujeto');
+        if (enlaces) { todasLasSiglas = enlaces; renderizarOpciones(enlaces); }
+        
+        const { data: folios } = await _supabase.rpc('generar_folios_duo_seguro');
+        if(folios) {
+            document.getElementById('consecutivo').value = folios[0].consecutivo_num;
+            document.getElementById('folio_e').value = folios[0].folio_e;
+        }
+        document.getElementById('loader').style.display = 'none';
     };
 
-    function updateCombo(lista) {
-        const sel = document.getElementById('siglas');
-        sel.innerHTML = '<option value="">-- Seleccionar --</option>' + 
-            lista.map(i => `<option value="${i.sujeto}">${i.sujeto} | ${i.entidad}</option>`).join('');
+    function renderizarOpciones(lista) {
+        const select = document.getElementById('siglasEmisor');
+        select.innerHTML = lista.map(item => `<option value="${item.sujeto}">${item.sujeto} | ${item.entidad}</option>`).join('');
     }
 
-    function filtrar(t) {
-        updateCombo(dataCache.filter(i => i.sujeto.toLowerCase().includes(t.toLowerCase())));
+    function filtrarSiglas(t) {
+        renderizarOpciones(todasLasSiglas.filter(i => i.sujeto.toLowerCase().includes(t.toLowerCase())));
     }
 
-    function llenar(s) {
-        const item = dataCache.find(i => i.sujeto === s);
-        if(item) {
-            document.getElementById('dep').value = item.entidad;
-            document.getElementById('fir').value = item.enlace;
-            document.getElementById('car').value = item.puesto;
+    function autoLlenarCampos(s) {
+        const reg = todasLasSiglas.find(i => i.sujeto === s);
+        if (reg) {
+            document.getElementById('dependencia').value = reg.entidad;
+            document.getElementById('firmante').value = reg.enlace;
+            document.getElementById('puesto').value = reg.puesto;
         }
     }
 
-    async function guardarRegistro() {
-        const btn = document.getElementById('btnGuardar');
-        const sigla = document.getElementById('siglas').value;
-        if(!sigla || !document.getElementById('asunto').value) return alert("Complete los campos obligatorios.");
+    async function ejecutarRegistroGlobal() {
+        const sigla = document.getElementById('siglasEmisor').value;
+        const asunto = document.getElementById('asunto').value;
+        if (!sigla || !asunto) return alert("Error: Seleccione sigla y escriba el asunto.");
 
-        btn.disabled = true;
-        btn.innerText = "Guardando...";
+        const btn = document.getElementById('btnMain');
+        btn.disabled = true; btn.innerText = "Procesando...";
 
         try {
             const cons = document.getElementById('consecutivo').value;
             const fe = document.getElementById('folio_e').value;
 
-            // 1. Insertar Correspondencia (Todos los campos de la imagen)
+            // 1. Insertar Correspondencia (TODOS LOS CAMPOS DE LA IMAGEN)
             const { error: err1 } = await _supabase.from('correspondencias').insert([{
                 consecutivo: cons,
                 folio_entrada: fe,
                 folio_interno_csf: document.getElementById('folio_interno').value,
                 oficio_solicitud: document.getElementById('oficio_solicitud').value,
-                num_oficio_remitente: document.getElementById('num_oficio_emisor').value,
+                num_oficio_remitente: document.getElementById('num_oficio_remitente').value,
                 fecha_recepcion: document.getElementById('fecha_recepcion').value,
                 medio_recepcion: document.getElementById('medio').value,
                 tipo_dispositivo: document.getElementById('tipo_dispositivo').value,
                 capacidad_info: document.getElementById('cap_info').value,
                 unidad_medida: document.getElementById('unidad_medida').value,
                 siglas_emisor: sigla,
-                dependencia: document.getElementById('dep').value,
-                firmante: document.getElementById('fir').value,
-                cargo: document.getElementById('car').value,
+                dependencia: document.getElementById('dependencia').value,
+                firmante: document.getElementById('firmante').value,
+                cargo: document.getElementById('puesto').value,
                 oficio_que_atiende: document.getElementById('oficio_atiende').value,
                 fecha_vencimiento: document.getElementById('fecha_vencimiento').value,
                 accion: document.getElementById('accion').value,
                 estatus: document.getElementById('estatus').value,
-                asunto: document.getElementById('asunto').value
+                asunto: asunto
             }]);
+            if (err1) throw err1;
 
-            if(err1) throw err1;
-
-            // 2. Insertar Folio de Entrada
+            // 2. Insertar Folio Entrada
             await _supabase.from('folios_entrada').insert([{ consecutivo: cons, ofa_e_folio: fe, origen: sigla }]);
 
-            // 3. Generar Salidas si se especificaron
-            const numSalidas = parseInt(document.getElementById('cant_salidas').value);
-            if(numSalidas > 0) {
-                const registrosSalida = [];
-                for(let i=1; i<=numSalidas; i++) {
-                    registrosSalida.push({
-                        consecutivo_madre: cons,
-                        ofa_s_folio: `S-OFA-` + i.toString().padStart(4, '0') // Formato S-OFA-0000
-                    });
+            // 3. Salidas
+            const n = parseInt(document.getElementById('cantSalidas').value);
+            if (n > 0) {
+                const salidas = [];
+                for (let i = 1; i <= n; i++) {
+                    salidas.push({ consecutivo_madre: cons, ofa_s_folio: `S-OFA-` + i.toString().padStart(4, '0') });
                 }
-                await _supabase.from('folios_salida').insert(registrosSalida);
+                await _supabase.from('folios_salida').insert(salidas);
             }
 
-            alert("Registro Guardado Exitosamente.");
-            location.reload();
-        } catch(e) {
-            alert("Error: " + e.message);
-            btn.disabled = false;
+            document.getElementById('listaFolios').innerHTML = `Folio Entrada: ${fe}<br>Salidas Generadas: ${n}`;
+            document.getElementById('modalResumen').style.display = 'flex';
+        } catch (e) {
+            alert(e.message); btn.disabled = false;
         }
     }
 </script>
-<style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
 </body>
 </html>
