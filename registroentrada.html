@@ -83,50 +83,69 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+    // Configuración de conexión
     const _supabase = supabase.createClient('https://zfztocmwphjfrabvbzlb.supabase.co', 'sb_publishable_cbOD6KTnjsGacu_GnAQm8g_nMuIoOIg');
+    
     let dataCache = [];
     let currentCons = 1;
     let currentFolio = 1;
 
     // Ejecución inicial robusta
     window.onload = async () => {
+        const statusEl = document.getElementById('syncStatus');
+        statusEl.innerText = "Verificando conexión...";
         console.log("Iniciando carga de sistema...");
         
-        // Ejecutamos ambos en paralelo, pero capturamos errores individualmente
-        // para que si uno falla, el otro NO se detenga.
-        await Promise.all([
-            cargarCatalogos().catch(e => console.error("Fallo catálogo:", e)),
-            consultarUltimosFolios().catch(e => console.error("Fallo folios:", e))
-        ]);
+        try {
+            // Ejecutamos ambos en paralelo con lógica de diagnóstico
+            await Promise.all([
+                cargarCatalogos(),
+                consultarUltimosFolios()
+            ]);
 
-        document.getElementById('loader').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
+        } catch (err) {
+            console.error("Error crítico de inicio:", err);
+            statusEl.innerText = "Error de Red";
+            statusEl.style.color = "red";
+        }
     };
 
     async function cargarCatalogos() {
         const combo = document.getElementById('sigla_select');
+        const statusEl = document.getElementById('syncStatus');
+
         try {
+            // Intento de lectura a la tabla enlacesdirec
             const { data, error } = await _supabase
                 .from('enlacesdirec')
                 .select('sujeto, entidad, enlace, puesto')
                 .order('sujeto', { ascending: true });
 
-            if (error) throw error;
+            if (error) {
+                console.error("Error Supabase Catálogo:", error);
+                combo.innerHTML = '<option value="">Error de Permisos (RLS)</option>';
+                statusEl.innerText = "🔒 Bloqueado por RLS";
+                statusEl.style.color = "orange";
+                return;
+            }
 
             if (data && data.length > 0) {
                 dataCache = data;
                 combo.innerHTML = '<option value="">-- Seleccione Sujeto --</option>' + 
                     data.map(i => `<option value="${i.sujeto}">${i.sujeto}</option>`).join('');
+                
                 console.log("Catálogo cargado:", data.length, "elementos.");
-                document.getElementById('syncStatus').innerText = "Conectado";
-                document.getElementById('syncStatus').style.color = "#22c55e";
+                statusEl.innerText = "Conectado";
+                statusEl.style.color = "#22c55e";
             } else {
-                combo.innerHTML = '<option value="">Sin datos en DB</option>';
+                combo.innerHTML = '<option value="">Tabla vacía en DB</option>';
+                statusEl.innerText = "Sin Datos";
+                statusEl.style.color = "var(--warning)";
             }
         } catch(e) {
-            console.error("Error detallado Catálogo:", e);
-            combo.innerHTML = '<option value="">Error al cargar (Ver RLS)</option>';
-            document.getElementById('syncStatus').innerText = "Error RLS";
-            document.getElementById('syncStatus').style.color = "#ef4444";
+            console.error("Fallo inesperado en catálogo:", e);
+            combo.innerHTML = '<option value="">Error fatal</option>';
         }
     }
 
@@ -139,21 +158,24 @@
                 .order('conse_regis', { ascending: false })
                 .limit(1);
 
-            if (error) throw error;
+            if (error) {
+                console.warn("No se pudo leer la tabla correspondencias (posiblemente vacía o RLS).");
+                throw error;
+            }
 
             const registro = data?.[0] || null;
             currentCons = (registro?.conse_regis || 0) + 1;
             
-            let ultimoFolioNum = 0;
+            let ultimoNum = 0;
             if (registro?.ofa_e) {
                 const matches = registro.ofa_e.match(/\d+/);
-                ultimoFolioNum = matches ? parseInt(matches[0]) : 0;
+                ultimoNum = matches ? parseInt(matches[0]) : 0;
             }
-            currentFolio = ultimoFolioNum + 1;
+            currentFolio = ultimoNum + 1;
 
             actualizarInterfazFolios();
         } catch (e) {
-            console.warn("No hay registros previos o error en tabla correspondencias. Iniciando en 1.");
+            console.warn("Iniciando folios en 1 por defecto.");
             actualizarInterfazFolios();
         }
     }
@@ -174,6 +196,10 @@
             document.getElementById('dep').value = item.entidad || '';
             document.getElementById('fir').value = item.enlace || '';
             document.getElementById('car').value = item.puesto || '';
+        } else {
+            document.getElementById('dep').value = '';
+            document.getElementById('fir').value = '';
+            document.getElementById('car').value = '';
         }
     }
 
@@ -182,9 +208,12 @@
         const sigla = document.getElementById('sigla_select').value;
         const asunto = document.getElementById('asunto').value.trim();
 
-        if(!sigla || asunto.length < 21) return alert("Datos incompletos.");
+        if(!sigla || asunto.length < 21) {
+            return alert("Datos incompletos. El asunto debe tener al menos 21 caracteres.");
+        }
 
-        btn.disabled = true; btn.innerText = "Guardando...";
+        btn.disabled = true; 
+        btn.innerText = "Guardando...";
 
         try {
             const folioFinal = `E-OFA-${currentFolio.toString().padStart(5, '0')}`;
@@ -201,10 +230,13 @@
             }]);
 
             if(error) throw error;
+            
+            document.getElementById('resumenFolio').innerHTML = `Consecutivo: ${currentCons}<br>Folio: ${folioFinal}`;
             document.getElementById('modalSuccess').style.display = 'flex';
         } catch(e) {
-            alert("Error: " + e.message);
+            alert("Error al guardar: " + e.message);
             btn.disabled = false;
+            btn.innerText = "Finalizar Registro";
         }
     }
 </script>
