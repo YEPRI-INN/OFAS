@@ -22,7 +22,7 @@
         .stat-label { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 5px; display: block; }
         .stat-value { font-size: 1.25rem; font-weight: 700; color: var(--text); }
 
-        /* Animación de parpadeo para actualización */
+        /* Animación de parpadeo */
         @keyframes pulse-update {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); border-top-color: var(--warning); box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
@@ -38,9 +38,8 @@
         .form-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
         .section-header { grid-column: span 12; margin: 20px 0 10px; font-size: 0.9rem; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; border-left: 4px solid var(--primary); padding-left: 12px; }
         
-        /* Inputs */
         .input-group { display: flex; flex-direction: column; gap: 6px; }
-        .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } .span-6 { grid-column: span 6; } .span-8 { grid-column: span 8; } .span-12 { grid-column: span 12; }
+        .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } .span-8 { grid-column: span 8; } .span-12 { grid-column: span 12; }
         
         label { font-size: 0.8rem; font-weight: 500; color: var(--text); }
         input, select, textarea { 
@@ -51,10 +50,7 @@
         input[readonly] { background: #f1f5f9; cursor: not-allowed; color: var(--primary); font-weight: 600; }
         
         .req-border { border-left: 3px solid var(--danger); }
-        .invalid-field { border: 1.5px solid var(--danger) !important; }
-        .valid-field { border: 1.5px solid var(--success) !important; }
 
-        /* Button */
         .btn-submit { 
             grid-column: span 12; margin-top: 30px; padding: 16px; 
             background: var(--primary); color: white; border: none; border-radius: 8px; 
@@ -78,7 +74,7 @@
         <div class="stat-card" id="cardCons"><span class="stat-label">Siguiente Consecutivo</span><div class="stat-value" id="dashCons">--</div></div>
         <div class="stat-card" id="cardFolio"><span class="stat-label">Siguiente Folio Entrada</span><div class="stat-value" id="dashFolio">--</div></div>
         <div class="stat-card"><span class="stat-label">Validación Asunto</span><div class="stat-value">Min. 21 Carac.</div></div>
-        <div class="stat-card" style="border-top-color: var(--success)"><span class="stat-label">Sync Tiempo Real</span><div class="stat-value" id="syncStatus" style="color: var(--success); font-size: 0.9rem;">Escaneando...</div></div>
+        <div class="stat-card" style="border-top-color: var(--success)"><span class="stat-label">Sync Tiempo Real</span><div class="stat-value" id="syncStatus" style="color: var(--success); font-size: 0.9rem;">Conectado</div></div>
     </div>
 
     <div class="form-card">
@@ -168,17 +164,20 @@
     window.onload = async () => {
         await cargarCatalogos();
         await consultarUltimosFolios(true);
-        // Iniciar monitoreo cada 5 segundos
         setInterval(consultarUltimosFolios, 5000);
         document.getElementById('loader').style.display = 'none';
     };
 
     async function cargarCatalogos() {
-        const { data } = await _supabase.from('enlacesdirec').select('sujeto, entidad_dep, quien_firma, puesto_firma').order('sujeto');
-        dataCache = data || [];
-        const combo = document.getElementById('sigla_select');
-        combo.innerHTML = '<option value="">-- Seleccione Sujeto --</option>' + 
-            dataCache.map(i => `<option value="${i.sujeto}">${i.sujeto}</option>`).join('');
+        try {
+            // Ajustado a los nombres de tus columnas reales en la tabla enlacesdirec
+            const { data, error } = await _supabase.from('enlacesdirec').select('sujeto, entidad, enlace, puesto').order('sujeto');
+            if (error) throw error;
+            dataCache = data || [];
+            const combo = document.getElementById('sigla_select');
+            combo.innerHTML = '<option value="">-- Seleccione Sujeto --</option>' + 
+                dataCache.map(i => `<option value="${i.sujeto}">${i.sujeto}</option>`).join('');
+        } catch(e) { console.error("Error catálogo:", e); }
     }
 
     async function consultarUltimosFolios(firstLoad = false) {
@@ -187,39 +186,33 @@
             const proxCons = (data?.conse_regis || 0) + 1;
             const proxFolio = (data?.OFA_E || 0) + 1;
 
-            // Si hay un cambio en los números, animar y actualizar
             if (proxCons !== currentCons || proxFolio !== currentFolio) {
-                if (!firstLoad) {
-                    animarCambio();
-                }
+                if (!firstLoad) animarCambio();
                 currentCons = proxCons;
                 currentFolio = proxFolio;
-                
                 document.getElementById('cons').value = proxCons;
                 document.getElementById('fe').value = proxFolio;
                 document.getElementById('dashCons').innerText = proxCons;
                 document.getElementById('dashFolio').innerText = proxFolio;
-                document.getElementById('syncStatus').innerText = "Sincronizado";
             }
-        } catch (e) {
-            document.getElementById('syncStatus').innerText = "Error Sync";
-        }
+        } catch (e) { console.error("Error Sync:", e); }
     }
 
     function animarCambio() {
         const cards = [document.getElementById('cardCons'), document.getElementById('cardFolio')];
         cards.forEach(c => {
             c.classList.remove('updating');
-            void c.offsetWidth; // Trigger reflow
+            void c.offsetWidth; 
             c.classList.add('updating');
         });
     }
 
     function autoCompletarEmisor(val) {
         const item = dataCache.find(i => i.sujeto === val);
-        document.getElementById('dep').value = item?.entidad_dep || '';
-        document.getElementById('fir').value = item?.quien_firma || '';
-        document.getElementById('car').value = item?.puesto_firma || '';
+        // Mapeo corregido según tu imagen de la tabla
+        document.getElementById('dep').value = item?.entidad || '';
+        document.getElementById('fir').value = item?.enlace || '';
+        document.getElementById('car').value = item?.puesto || '';
     }
 
     function verificarOtro(v) { document.getElementById('otroBox').style.display = (v === 'Otro') ? 'flex' : 'none'; }
@@ -229,7 +222,6 @@
         const count = document.getElementById('charCount');
         const msg = document.getElementById('valMsg');
         count.innerText = `Caracteres: ${len} / 21`;
-        
         if(len >= 21) {
             this.style.borderColor = 'var(--success)';
             count.style.color = 'var(--success)';
@@ -251,15 +243,13 @@
         const asunto = document.getElementById('asunto').value.trim();
 
         if(!f_int || !sigla || !of_sol || asunto.length < 21) {
-            return alert("⚠️ Complete los campos obligatorios y el asunto mínimo de 21 caracteres.");
+            return alert("⚠️ Verifique los campos obligatorios y el mínimo de caracteres en Asunto.");
         }
 
-        btn.disabled = true; btn.innerText = "Registrando...";
+        btn.disabled = true; btn.innerText = "Guardando...";
 
         try {
-            // Última verificación antes de insertar
             await consultarUltimosFolios();
-
             const dispoFinal = document.getElementById('tipoDispositivo').value === 'Otro' ? 
                                document.getElementById('otroDetalle').value : 
                                document.getElementById('tipoDispositivo').value;
@@ -280,10 +270,8 @@
             }]);
 
             if(error) throw error;
-
             document.getElementById('resumenFolio').innerHTML = `CONSECUTIVO: ${currentCons}<br>FOLIO ENTRADA: ${currentFolio}`;
             document.getElementById('modalSuccess').style.display = 'flex';
-
         } catch(e) { alert("Error: " + e.message); btn.disabled = false; btn.innerText = "Reintentar"; }
     }
 </script>
