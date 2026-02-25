@@ -13,34 +13,24 @@
             --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
         }
         body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding: 40px 20px; }
-        
         .container { max-width: 1000px; margin: 0 auto; }
-        
-        /* Dashboard Stats */
         .dashboard-mini { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); border-top: 4px solid var(--primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: 0.3s; }
         .stat-label { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 5px; display: block; }
         .stat-value { font-size: 1.25rem; font-weight: 700; color: var(--text); }
-
-        /* Animación de parpadeo */
         @keyframes pulse-update {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); border-top-color: var(--warning); box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
             100% { transform: scale(1); }
         }
         .updating { animation: pulse-update 0.8s ease-in-out; }
-
-        /* Form Card */
         .form-card { background: var(--card-bg); padding: 40px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         h2 { margin: 0 0 30px 0; font-size: 1.5rem; border-bottom: 2px solid var(--bg); padding-bottom: 15px; }
         h2 span { color: var(--primary); }
-
         .form-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
         .section-header { grid-column: span 12; margin: 20px 0 10px; font-size: 0.9rem; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; border-left: 4px solid var(--primary); padding-left: 12px; }
-        
         .input-group { display: flex; flex-direction: column; gap: 6px; }
         .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } .span-8 { grid-column: span 8; } .span-12 { grid-column: span 12; }
-        
         label { font-size: 0.8rem; font-weight: 500; color: var(--text); }
         input, select, textarea { 
             padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; 
@@ -48,16 +38,13 @@
         }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         input[readonly] { background: #f1f5f9; cursor: not-allowed; color: var(--primary); font-weight: 600; }
-        
         .req-border { border-left: 3px solid var(--danger); }
-
         .btn-submit { 
             grid-column: span 12; margin-top: 30px; padding: 16px; 
             background: var(--primary); color: white; border: none; border-radius: 8px; 
             font-weight: 600; cursor: pointer; font-size: 1rem; transition: background 0.2s;
         }
         .btn-submit:hover { background: var(--primary-hover); }
-
         #loader { position: fixed; inset: 0; background: white; z-index: 50; display: flex; align-items: center; justify-content: center; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 30px; border-radius: 12px; width: 400px; text-align: center; }
@@ -71,15 +58,14 @@
 
 <div class="container">
     <div class="dashboard-mini">
-        <div class="stat-card" id="cardCons"><span class="stat-label">Siguiente Consecutivo</span><div class="stat-value" id="dashCons">--</div></div>
-        <div class="stat-card" id="cardFolio"><span class="stat-label">Siguiente Folio Entrada</span><div class="stat-value" id="dashFolio">--</div></div>
-        <div class="stat-card"><span class="stat-label">Validación Asunto</span><div class="stat-value">Min. 21 Carac.</div></div>
-        <div class="stat-card" style="border-top-color: var(--success)"><span class="stat-label">Sync Tiempo Real</span><div class="stat-value" id="syncStatus" style="color: var(--success); font-size: 0.9rem;">Conectado</div></div>
+        <div class="stat-card" id="cardCons"><span class="stat-label">Próximo Consecutivo</span><div class="stat-value" id="dashCons">--</div></div>
+        <div class="stat-card" id="cardFolio"><span class="stat-label">Próximo Folio Entrada</span><div class="stat-value" id="dashFolio">--</div></div>
+        <div class="stat-card"><span class="stat-label">Validación</span><div class="stat-value">Activa (21c)</div></div>
+        <div class="stat-card" style="border-top-color: var(--success)"><span class="stat-label">Sync Tiempo Real</span><div class="stat-value" id="syncStatus" style="color: var(--success); font-size: 0.9rem;">Ok</div></div>
     </div>
 
     <div class="form-card">
         <h2>Registro de Correspondencia <span>Maestro</span></h2>
-        
         <div class="form-grid">
             <div class="section-header">1. Datos de Control e Identificación</div>
             <div class="input-group span-3"><label>Consecutivo (Auto)</label><input type="text" id="cons" readonly></div>
@@ -107,50 +93,47 @@
 
             <div class="section-header">3. Detalles de la Gestión y Medios</div>
             <div class="input-group span-4">
-                <label>🧮 Tipo de Gestión</label>
+                <label>Tipo de Gestión</label>
                 <select id="tipoGestion">
-                    <option value="Administrativo">📂 Administrativo</option>
-                    <option value="Técnico">🛠️ Técnico / Operativo</option>
-                    <option value="Legal">⚖️ Legal / Jurídico</option>
-                    <option value="Archivo">🗃️ Archivo / Conocimiento</option>
-                    <option value="Urgente">🚨 Asunto Urgente</option>
+                    <option value="Administrativo">Administrativo</option>
+                    <option value="Técnico">Técnico / Operativo</option>
+                    <option value="Legal">Legal / Jurídico</option>
+                    <option value="Archivo">Archivo / Conocimiento</option>
+                    <option value="Urgente">Asunto Urgente</option>
                 </select>
             </div>
             <div class="input-group span-4">
-                <label>💾 Tipo de Dispositivo</label>
+                <label>Tipo de Dispositivo</label>
                 <select id="tipoDispositivo" onchange="verificarOtro(this.value)">
-                    <option value="N/A">🚫 Ninguno</option>
-                    <option value="CD 700 MB">💿 CD - 700 MB</option>
-                    <option value="DVD 4.5 GB">📀 DVD - 4.5 GB</option>
-                    <option value="USB 16 GB">⚡ USB - 16 GB</option>
-                    <option value="USB 32 GB">⚡ USB - 32 GB</option>
-                    <option value="Otro">📦 Otro (Especificar)</option>
+                    <option value="N/A">Ninguno</option>
+                    <option value="CD 700 MB">CD - 700 MB</option>
+                    <option value="DVD 4.5 GB">DVD - 4.5 GB</option>
+                    <option value="USB 16 GB">USB - 16 GB</option>
+                    <option value="Otro">Otro (Especificar)</option>
                 </select>
             </div>
-            <div class="input-group span-4" id="otroBox" style="display:none"><label>Especifique dispositivo</label><input type="text" id="otroDetalle"></div>
+            <div class="input-group span-4" id="otroBox" style="display:none"><label>Especifique</label><input type="text" id="otroDetalle"></div>
             <div class="input-group span-4"><label>Fecha del Documento</label><input type="date" id="f_doc"></div>
 
             <div class="section-header">4. Extracto del Documento</div>
             <div class="input-group span-12">
                 <label>Asunto / Comentarios (Mínimo 21 caracteres) *</label>
-                <textarea id="asunto" rows="4" placeholder="Redacte el asunto aquí..."></textarea>
+                <textarea id="asunto" rows="4"></textarea>
                 <div style="display:flex; justify-content:space-between; margin-top:5px">
-                    <small id="charCount" style="color:var(--danger); font-weight:bold;">Caracteres: 0 / 21</small>
-                    <small id="valMsg" style="color:var(--danger)">No cumple el mínimo</small>
+                    <small id="charCount" style="color:var(--danger)">Caracteres: 0 / 21</small>
                 </div>
             </div>
 
-            <button class="btn-submit" id="btnSave" onclick="ejecutarGuardado()">Finalizar y Registrar Registro</button>
+            <button class="btn-submit" id="btnSave" onclick="ejecutarGuardado()">Finalizar Registro</button>
         </div>
     </div>
 </div>
 
 <div id="modalSuccess" class="modal">
     <div class="modal-content">
-        <div style="color:var(--success); font-size: 3rem; margin-bottom: 10px;">✔</div>
-        <h3>¡Registro Exitoso!</h3>
-        <p id="resumenFolio" style="background:#f1f5f9; padding:15px; border-radius:8px; font-family:monospace; font-weight: bold; color: var(--primary)"></p>
-        <button onclick="location.reload()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600">Aceptar</button>
+        <h3 style="color:var(--success)">¡Registro Exitoso!</h3>
+        <p id="resumenFolio"></p>
+        <button onclick="location.reload()" style="width:100%; padding:10px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer">Aceptar</button>
     </div>
 </div>
 
@@ -170,19 +153,27 @@
 
     async function cargarCatalogos() {
         try {
-            // Ajustado a los nombres de tus columnas reales en la tabla enlacesdirec
-            const { data, error } = await _supabase.from('enlacesdirec').select('sujeto, entidad, enlace, puesto').order('sujeto');
+            // CORRECCIÓN: Nombres de columnas según tu imagen de base de datos
+            const { data, error } = await _supabase
+                .from('enlacesdirec')
+                .select('sujeto, entidad, enlace, puesto')
+                .order('sujeto', { ascending: true });
+
             if (error) throw error;
             dataCache = data || [];
             const combo = document.getElementById('sigla_select');
             combo.innerHTML = '<option value="">-- Seleccione Sujeto --</option>' + 
                 dataCache.map(i => `<option value="${i.sujeto}">${i.sujeto}</option>`).join('');
-        } catch(e) { console.error("Error catálogo:", e); }
+        } catch(e) { 
+            console.error("Error catálogo:", e.message); 
+            document.getElementById('syncStatus').innerText = "Error DB";
+        }
     }
 
     async function consultarUltimosFolios(firstLoad = false) {
         try {
-            const { data } = await _supabase.from('correspondencias').select('conse_regis, OFA_E').order('conse_regis', { ascending: false }).limit(1).maybeSingle();
+            const { data, error } = await _supabase.from('correspondencias').select('conse_regis, OFA_E').order('conse_regis', { ascending: false }).limit(1).maybeSingle();
+            if (error) throw error;
             const proxCons = (data?.conse_regis || 0) + 1;
             const proxFolio = (data?.OFA_E || 0) + 1;
 
@@ -195,24 +186,26 @@
                 document.getElementById('dashCons').innerText = proxCons;
                 document.getElementById('dashFolio').innerText = proxFolio;
             }
-        } catch (e) { console.error("Error Sync:", e); }
+        } catch (e) { console.error("Error Folios:", e.message); }
     }
 
     function animarCambio() {
         const cards = [document.getElementById('cardCons'), document.getElementById('cardFolio')];
         cards.forEach(c => {
             c.classList.remove('updating');
-            void c.offsetWidth; 
+            void c.offsetWidth;
             c.classList.add('updating');
         });
     }
 
     function autoCompletarEmisor(val) {
         const item = dataCache.find(i => i.sujeto === val);
-        // Mapeo corregido según tu imagen de la tabla
-        document.getElementById('dep').value = item?.entidad || '';
-        document.getElementById('fir').value = item?.enlace || '';
-        document.getElementById('car').value = item?.puesto || '';
+        if(item) {
+            // CORRECCIÓN: Usando los nombres de tu tabla real
+            document.getElementById('dep').value = item.entidad || '';
+            document.getElementById('fir').value = item.enlace || '';
+            document.getElementById('car').value = item.puesto || '';
+        }
     }
 
     function verificarOtro(v) { document.getElementById('otroBox').style.display = (v === 'Otro') ? 'flex' : 'none'; }
@@ -220,19 +213,8 @@
     document.getElementById('asunto').addEventListener('input', function() {
         const len = this.value.trim().length;
         const count = document.getElementById('charCount');
-        const msg = document.getElementById('valMsg');
         count.innerText = `Caracteres: ${len} / 21`;
-        if(len >= 21) {
-            this.style.borderColor = 'var(--success)';
-            count.style.color = 'var(--success)';
-            msg.innerText = '✅ Válido';
-            msg.style.color = 'var(--success)';
-        } else {
-            this.style.borderColor = 'var(--danger)';
-            count.style.color = 'var(--danger)';
-            msg.innerText = 'No cumple el mínimo';
-            msg.style.color = 'var(--danger)';
-        }
+        count.style.color = len >= 21 ? 'var(--success)' : 'var(--danger)';
     });
 
     async function ejecutarGuardado() {
@@ -243,17 +225,13 @@
         const asunto = document.getElementById('asunto').value.trim();
 
         if(!f_int || !sigla || !of_sol || asunto.length < 21) {
-            return alert("⚠️ Verifique los campos obligatorios y el mínimo de caracteres en Asunto.");
+            return alert("⚠️ Verifique los campos obligatorios y el mínimo de caracteres.");
         }
 
         btn.disabled = true; btn.innerText = "Guardando...";
 
         try {
             await consultarUltimosFolios();
-            const dispoFinal = document.getElementById('tipoDispositivo').value === 'Otro' ? 
-                               document.getElementById('otroDetalle').value : 
-                               document.getElementById('tipoDispositivo').value;
-
             const { error } = await _supabase.from('correspondencias').insert([{
                 conse_regis: currentCons,
                 OFA_E: currentFolio,
@@ -263,7 +241,7 @@
                 entidad_dep: document.getElementById('dep').value,
                 quien_firma: document.getElementById('fir').value,
                 puesto_firma: document.getElementById('car').value,
-                tipo_dispo: dispoFinal,
+                tipo_dispo: document.getElementById('tipoDispositivo').value,
                 accion_realizar: document.getElementById('tipoGestion').value,
                 estatus: document.getElementById('estatus').value,
                 asunto_firma: asunto
