@@ -25,18 +25,17 @@
         .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } .span-6 { grid-column: span 6; } .span-8 { grid-column: span 8; } .span-12 { grid-column: span 12; }
         
         label { font-size: 0.75rem; font-weight: 700; color: var(--text-light); display: flex; align-items: center; gap: 5px; }
-        input, select, textarea { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; width: 100%; box-sizing: border-box; }
+        input, select, textarea { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; width: 100%; box-sizing: border-box; transition: 0.2s; }
         input[readonly] { background: #f1f5f9; cursor: not-allowed; }
 
-        /* RESALTADOS SOLICITADOS */
+        /* RESALTADOS */
         .highlight-green { border: 2px solid var(--success-green) !important; background-color: #f0fdf4; color: #15803d; font-weight: 600; }
         .label-green { color: #15803d !important; }
         
         .highlight-red { border: 2px solid var(--danger-red) !important; background-color: #fef2f2; color: #b91c1c; font-weight: 600; }
         .label-red { color: #b91c1c !important; }
 
-        .btn-submit { grid-column: span 12; margin-top: 30px; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: 0.3s; }
-        .btn-submit:hover { background: #1d4ed8; transform: translateY(-2px); }
+        .btn-submit { grid-column: span 12; margin-top: 30px; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; }
         #loader { position: fixed; inset: 0; background: white; z-index: 200; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 300; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 40px; border-radius: 16px; width: 450px; text-align: center; }
@@ -62,83 +61,80 @@
             <div class="input-group span-3"><label>📑 Folio Interno</label><input type="text" id="folio_inter" placeholder="Ej: 001/2026"></div>
             
             <div class="input-group span-3">
-                <label class="label-red">📥 Medio de Entrega</label>
-                <select id="medio_entrega" class="highlight-red">
-                    <option value="Oficio">Oficio</option>
-                    <option value="Físico">Físico</option>
-                    <option value="Correo">Correo Electrónico</option>
+                <label class="label-red">📥🟠 Medio de Entrega</label>
+                <select id="medio_entrega" class="highlight-red" onchange="verificarMedioOtro(this.value)">
+                    <option value="Físico (impreso)">📃 Físico (impreso)</option>
+                    <option value="Correo Electrónico">📩 Correo Electrónico</option>
+                    <option value="Firma Digital (FIEL)">💻 Firma Digital (FIEL)</option>
+                    <option value="Otro">🌀 Otro</option>
                 </select>
             </div>
             
-            <div class="input-group span-8">
-                <label class="label-red">📥 Oficio que Atiende</label>
-                <input type="text" id="ofi_firmante" class="highlight-red" placeholder="Referencia del oficio">
+            <div class="input-group span-3">
+                <label>🌀 Especificar Medio (Máx 11)</label>
+                <input type="text" id="otro_medio" placeholder="Deshabilitado" disabled maxlength="11">
             </div>
-            <div class="input-group span-4">
-                <label class="label-red">📥 Fecha Ingreso Oficio</label>
+
+            <div class="input-group span-3">
+                <label class="label-red">📥 🟠 Num. Oficio a Ingresar</label>
+                <input type="text" id="num_oficio_ingresar" class="highlight-red" placeholder="Número oficial">
+            </div>
+
+            <div class="input-group span-3">
+                <label class="label-red">📥 🟠 Oficio que Atiende</label>
+                <input type="text" id="ofi_firmante" class="highlight-red" placeholder="Referencia">
+            </div>
+            
+            <div class="input-group span-3">
+                <label class="label-red">📥 🟠 Fecha Ingreso Oficio</label>
                 <input type="date" id="fecha_ingreo_ofi" class="highlight-red">
             </div>
 
             <div class="section-header">2. Detalles del Dispositivo / Medio</div>
             <div class="input-group span-6">
-                <label>💾 Tipo de Dispositivo / Medio</label>
+                <label>💾 🟠 Tipo de Dispositivo / Medio</label>
                 <select id="tipoDispositivo" onchange="verificarOtro(this.value)">
                     <option value="N/A">🚫 No aplica / Ninguno</option>
                     <option value="CD 700 MB">💿 Disco compacto (CD) - 700 MB</option>
                     <option value="DVD 4.5 GB">📀 Disco compacto (DVD) - 4.5 GB</option>
-                <option value="USB 8 GB">⚡ Memoria USB - 8 GB</option>
-               <option value="USB 16 GB">⚡ Memoria USB - 16 GB</option>
-                <option value="USB 32 GB">⚡ Memoria USB - 32 GB</option>
-                <option value="USB 64 GB">⚡ Memoria USB - 64 GB</option>
-                <option value="USB 128 GB">⚡ Memoria USB - 128 GB</option>
-                <option value="USB 256 GB">⚡ Memoria USB - 256 GB</option>
-                <option value="Otro">📋 Otro (Especificar)</option>
+                    <option value="USB 16 GB">⚡ Memoria USB - 16 GB</option>
+                    <option value="USB 64 GB">⚡ Memoria USB - 64 GB</option>
+                    <option value="Otro">🛠️ Otro (Especificar)</option>
                 </select>
             </div>
-            <div class="input-group span-3"><label>🛠️ Especificar</label><input type="text" id="otro_dispo" disabled></div>
-            <div class="input-group span-3"><label>📅 Fecha Vencimiento</label><input type="date" id="fecha_venci"></div>
+            <div class="input-group span-3"><label>🛠️ 🟠 Especificar Disp.</label><input type="text" id="otro_dispo" disabled></div>
+            <div class="input-group span-3"><label>📅 🟠 Fecha Vencimiento</label><input type="date" id="fecha_venci"></div>
 
             <div class="section-header">3. Información del Emisor</div>
-            <div class="input-group span-4">
-                <label>🏢 Siglas Emisor *</label>
-                <select id="sigla_select" onchange="autoCompletarEmisor(this.value)"></select>
-            </div>
-            <div class="input-group span-8"><label>🏛️ Dependencia / Ente</label><input type="text" id="entidad_dep" readonly></div>
-            <div class="input-group span-4"><label>👤 Nombre Firmante</label><input type="text" id="quien_firma" readonly></div>
-            <div class="input-group span-4"><label>💼 Cargo</label><input type="text" id="puesto_firma" readonly></div>
-            
-            <div class="input-group span-4">
-                <label class="label-red">📥 Num. Oficio a Ingresar</label>
-                <input type="text" id="num_oficio_ingresar" class="highlight-red">
-            </div>
+            <div class="input-group span-4"><label>🏢🟠 Siglas Emisor *</label><select id="sigla_select" onchange="autoCompletarEmisor(this.value)"></select></div>
+            <div class="input-group span-8"><label>🏛️🟠 Dependencia / Ente</label><input type="text" id="entidad_dep" readonly></div>
+            <div class="input-group span-4"><label>👤🟠 Nombre Firmante</label><input type="text" id="quien_firma" readonly></div>
+            <div class="input-group span-8"><label>💼🟠 Cargo</label><input type="text" id="puesto_firma" readonly></div>
 
             <div class="section-header">4. Extracto y Gestión</div>
-            
             <div class="input-group span-3">
-                <label class="label-green">📤 Generar Salidas (1:N)</label>
-                <select id="cant_salidas" class="highlight-green" onchange="previewSalidas()">
-                    </select>
+                <label class="label-green">📤🟢 Generar Salidas (0-100)</label>
+                <select id="cant_salidas" class="highlight-green" onchange="previewSalidas()"></select>
             </div>
             <div class="input-group span-3">
-                <label class="label-green">📤 Vistazo Folios Salida</label>
-                <input type="text" id="ofa_s_view" class="highlight-green" readonly placeholder="No generado">
+                <label class="label-green">📤🟢 Vistazo Folios Salida</label>
+                <input type="text" id="ofa_s_view" class="highlight-green" readonly placeholder="---">
             </div>
-
             <div class="input-group span-3">
-                <label class="label-red">📥 Acción a Realizar</label>
+                <label class="label-red">📥🟢 Acción a Realizar</label>
                 <input type="text" id="accion_realizar" class="highlight-red">
             </div>
             <div class="input-group span-3">
-                <label>⚡ Estatus</label>
+                <label>⚡🟠 Estatus</label>
                 <select id="estatus">
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="En Proceso">En Proceso</option>
-                    <option value="Finalizado">Finalizado</option>
+                    <option value="Pendiente">🚧Pendiente</option>
+                    <option value=En Proceso">🚦En Proceso</option>
+                    <option value="Para Archivoo">🗃️ Archivo</option>
+                    <option value="Finalizado"> ☑️ Finalizado</option>
                 </select>
             </div>
-
-            <div class="input-group span-12"><label>📝 Asunto (mín. 21 carac.) *</label><textarea id="asunto_firma" rows="2"></textarea></div>
-            <div class="input-group span-12"><label>💬 Comentarios</label><textarea id="comenta" rows="2"></textarea></div>
+            <div class="input-group span-12"><label>📝🟠 Asunto (mín. 21 carac.) *</label><textarea id="asunto_firma" rows="2"></textarea></div>
+            <div class="input-group span-12"><label>💬🟠 Comentarios</label><textarea id="comenta" rows="2"></textarea></div>
 
             <button class="btn-submit" id="btnSave" onclick="ejecutarGuardado()">Finalizar Registro e Insertar Folios</button>
         </div>
@@ -167,7 +163,6 @@
         } catch (err) { console.error(err); }
     };
 
-    // Generar opciones 0 a 100
     function llenarSelectorSalidas() {
         const select = document.getElementById('cant_salidas');
         for (let i = 0; i <= 100; i++) {
@@ -176,6 +171,12 @@
             opt.innerHTML = i === 0 ? "0 - Ninguna" : `${i} Folio${i > 1 ? 's' : ''}`;
             select.appendChild(opt);
         }
+    }
+
+    function verificarMedioOtro(val) {
+        const input = document.getElementById('otro_medio');
+        input.disabled = (val !== 'Otro');
+        if(val !== 'Otro') input.value = ''; else input.placeholder = 'Escribe aquí';
     }
 
     function verificarOtro(valor) {
@@ -236,7 +237,8 @@
         const btn = document.getElementById('btnSave');
         const asu = document.getElementById('asunto_firma').value.trim();
         const cant = parseInt(document.getElementById('cant_salidas').value);
-        const folioE = document.getElementById('ofa_e').value;
+        const medioSel = document.getElementById('medio_entrega').value;
+        const otroMedioVal = document.getElementById('otro_medio').value;
 
         if(!document.getElementById('sigla_select').value || asu.length < 21) {
             return alert("Revisa el emisor y el asunto");
@@ -250,10 +252,10 @@
 
             const { error: err1 } = await _supabase.from('correspondencias').insert([{
                 conse_regis: nextCons,
-                ofa_e: folioE,
+                ofa_e: document.getElementById('ofa_e').value,
                 ofa_s: fSalidas.join(", "),
                 folio_inter: document.getElementById('folio_inter').value,
-                medio_entrega: document.getElementById('medio_entrega').value,
+                medio_entrega: medioSel === 'Otro' ? otroMedioVal : medioSel,
                 tipo_dispo: document.getElementById('tipoDispositivo').value === 'Otro' ? document.getElementById('otro_dispo').value : document.getElementById('tipoDispositivo').value,
                 siglas_emis: document.getElementById('sigla_select').value,
                 entidad_dep: document.getElementById('entidad_dep').value,
@@ -271,11 +273,11 @@
             if(err1) throw err1;
 
             if(cant > 0) {
-                const inserts = fSalidas.map(s => ({ ofa_s_folio: s, ofa_e: folioE }));
+                const inserts = fSalidas.map(s => ({ ofa_s_folio: s, ofa_e: document.getElementById('ofa_e').value }));
                 await _supabase.from('folio_salida').insert(inserts);
             }
 
-            document.getElementById('resumenFolio').innerHTML = `<b>Entrada:</b> ${folioE}<br><b>Salidas creadas:</b> ${cant}`;
+            document.getElementById('resumenFolio').innerHTML = `<b>Registro guardado</b><br>Entrada: ${document.getElementById('ofa_e').value}<br>Salidas: ${cant}`;
             document.getElementById('modalSuccess').style.display = 'flex';
 
         } catch (e) {
