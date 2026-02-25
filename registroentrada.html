@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registro Maestro | YEPRI-INN METAX</title>
+    <title>Registro Maestro Pro | YEPRI-INN METAX</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,230 +13,257 @@
             --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
         }
         body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding: 40px 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
+        .container { max-width: 1100px; margin: 0 auto; }
         .dashboard-mini { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); border-top: 4px solid var(--primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .stat-label { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 5px; display: block; }
         .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+        
         .form-card { background: var(--card-bg); padding: 40px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         .form-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
-        .section-header { grid-column: span 12; margin: 20px 0 10px; font-size: 0.9rem; font-weight: 600; color: var(--primary); text-transform: uppercase; border-left: 4px solid var(--primary); padding-left: 12px; }
+        .section-header { grid-column: span 12; margin: 20px 0 10px; font-size: 0.9rem; font-weight: 600; color: var(--primary); text-transform: uppercase; border-left: 4px solid var(--primary); padding-left: 12px; background: #f0f7ff; padding-top: 5px; padding-bottom: 5px; }
+        
         .input-group { display: flex; flex-direction: column; gap: 6px; }
-        .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } .span-8 { grid-column: span 8; } .span-12 { grid-column: span 12; }
-        input, select, textarea { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
-        input[readonly] { background: #f1f5f9; font-weight: 600; color: var(--primary); }
-        .btn-submit { grid-column: span 12; margin-top: 30px; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        #loader { position: fixed; inset: 0; background: white; z-index: 50; display: flex; align-items: center; justify-content: center; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 400px; text-align: center; }
+        .span-2 { grid-column: span 2; } .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } 
+        .span-6 { grid-column: span 6; } .span-8 { grid-column: span 8; } .span-9 { grid-column: span 9; } .span-12 { grid-column: span 12; }
+        
+        label { font-size: 0.75rem; font-weight: 600; color: var(--text-light); }
+        input, select, textarea { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; width: 100%; box-sizing: border-box; }
+        input[readonly] { background: #f1f5f9; font-weight: 600; color: var(--primary); cursor: not-allowed; }
+        
+        .btn-submit { grid-column: span 12; margin-top: 30px; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        .btn-submit:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        
+        #loader { position: fixed; inset: 0; background: white; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 300; backdrop-filter: blur(4px); }
+        .modal-content { background: white; padding: 40px; border-radius: 16px; width: 450px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
+        .highlight-res { background: #eff6ff; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px dashed var(--primary); font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-<div id="loader">Cargando Sistema...</div>
+<div id="loader">
+    <div>CARGANDO SISTEMA METAX...</div>
+    <div style="font-size: 0.8rem; margin-top: 10px; color: var(--primary);">Estableciendo conexión segura</div>
+</div>
 
 <div class="container">
     <div class="dashboard-mini">
-        <div class="stat-card"><span class="stat-label">Consecutivo</span><div class="stat-value" id="dashCons">00001</div></div>
-        <div class="stat-card"><span class="stat-label">Folio Entrada</span><div class="stat-value" id="dashFolio">E-OFA-00001</div></div>
-        <div class="stat-card"><span class="stat-label">Estado DB</span><div class="stat-value" id="syncStatus">Sincronizando...</div></div>
-        <div class="stat-card"><span class="stat-label">Validación</span><div class="stat-value">Activa (21c)</div></div>
+        <div class="stat-card"><span class="stat-label">Consecutivo</span><div class="stat-value" id="dashCons">---</div></div>
+        <div class="stat-card"><span class="stat-label">Folio Entrada</span><div class="stat-value" id="dashFolio">---</div></div>
+        <div class="stat-card"><span class="stat-label">Prox. Folio Salida</span><div class="stat-value" id="dashSalida">---</div></div>
+        <div class="stat-card"><span class="stat-label">Estado DB</span><div class="stat-value" id="syncStatus">Conectando...</div></div>
     </div>
 
     <div class="form-card">
         <div class="form-grid">
-            <div class="section-header">1. Control de Folios</div>
-            <div class="input-group span-3"><label>Consecutivo</label><input type="text" id="cons" readonly></div>
-            <div class="input-group span-3"><label>Folio Entrada</label><input type="text" id="fe" readonly></div>
-            <div class="input-group span-3"><label>Folio Interno CSF</label><input type="text" id="f_int" placeholder="001/2026"></div>
-            <div class="input-group span-3"><label>Oficio Solicitud</label><input type="text" id="of_sol"></div>
+            <div class="section-header">1. Control de Folios e Identificación</div>
+            <div class="input-group span-3"><label>Consecutivo (conse_regis)</label><input type="text" id="conse_regis" readonly></div>
+            <div class="input-group span-3"><label>Folio Entrada (ofa_e)</label><input type="text" id="ofa_e" readonly></div>
+            <div class="input-group span-3">
+                <label style="color:var(--primary)">Generar Salidas (1:N)</label>
+                <select id="cant_salidas" onchange="previewSalidas()">
+                    <option value="0">0 - Ninguna</option>
+                    <option value="1">1 Salida</option>
+                    <option value="2">2 Salidas</option>
+                    <option value="3">3 Salidas</option>
+                </select>
+            </div>
+            <div class="input-group span-3"><label>Vistazo Folios Salida</label><input type="text" id="ofa_s_view" readonly placeholder="No generado"></div>
+            
+            <div class="input-group span-4"><label>Folio Interno (folio_inter)</label><input type="text" id="folio_inter" placeholder="Ej: 001/2026"></div>
+            <div class="input-group span-4"><label>Medio de Entrega</label>
+                <select id="medio_entrega">
+                    <option value="Oficio">Oficio</option>
+                    <option value="Físico">Físico</option>
+                    <option value="Correo">Correo Electrónico</option>
+                </select>
+            </div>
+            <div class="input-group span-4"><label>Fecha Ingreso Oficio</label><input type="date" id="fecha_ingreo_ofi"></div>
 
-            <div class="section-header">2. Información del Emisor</div>
+            <div class="section-header">2. Detalles Técnicos del Documento</div>
+            <div class="input-group span-3"><label>Tipo Dispositivo</label>
+                <select id="tipo_dispo">
+                    <option value="Ninguno">Ninguno</option>
+                    <option value="USB">USB</option>
+                    <option value="CD/DVD">CD/DVD</option>
+                </select>
+            </div>
+            <div class="input-group span-3"><label>Capacidad (Cap. Info)</label><input type="text" id="cap_info" placeholder="Ej: 16"></div>
+            <div class="input-group span-3"><label>Unidad (uni_medi)</label><input type="text" id="uni_medi" placeholder="GB / MB"></div>
+            <div class="input-group span-3"><label>Fecha Vencimiento</label><input type="date" id="fecha_venci"></div>
+
+            <div class="section-header">3. Información del Emisor (Sujeto Obligado)</div>
             <div class="input-group span-4">
-                <label>Siglas Emisor (Sujeto) *</label>
+                <label>Siglas Emisor (siglas_emis) *</label>
                 <select id="sigla_select" onchange="autoCompletarEmisor(this.value)">
                     <option value="">-- Seleccione Sujeto --</option>
                 </select>
             </div>
-            <div class="input-group span-8"><label>Dependencia / Ente</label><input type="text" id="dep" readonly></div>
-            <div class="input-group span-4"><label>Nombre del Firmante</label><input type="text" id="fir" readonly></div>
-            <div class="input-group span-4"><label>Cargo</label><input type="text" id="car" readonly></div>
-            <div class="input-group span-4"><label>Estatus</label><select id="estatus"><option>Pendiente</option></select></div>
+            <div class="input-group span-8"><label>Dependencia / Ente (entidad_dep)</label><input type="text" id="entidad_dep" readonly></div>
+            <div class="input-group span-4"><label>Nombre Firmante (quien_firma)</label><input type="text" id="quien_firma" readonly></div>
+            <div class="input-group span-4"><label>Cargo (puesto_firma)</label><input type="text" id="puesto_firma" readonly></div>
+            <div class="input-group span-4"><label>Num. Oficio a Ingresar</label><input type="text" id="num_oficio_ingresar"></div>
 
-            <div class="section-header">3. Extracto del Documento</div>
-            <div class="input-group span-12">
-                <textarea id="asunto" rows="3" placeholder="Mínimo 21 caracteres"></textarea>
+            <div class="section-header">4. Extracto y Gestión</div>
+            <div class="input-group span-4"><label>Oficio que Atiende</label><input type="text" id="ofi_firmante"></div>
+            <div class="input-group span-4"><label>Acción a Realizar</label><input type="text" id="accion_realizar"></div>
+            <div class="input-group span-4"><label>Estatus</label>
+                <select id="estatus">
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En Proceso">En Proceso</option>
+                    <option value="Finalizado">Finalizado</option>
+                </select>
             </div>
+            <div class="input-group span-12"><label>Asunto (asunto_firma) - Mínimo 21 caracteres *</label><textarea id="asunto_firma" rows="2"></textarea></div>
+            <div class="input-group span-12"><label>Comentarios (comenta)</label><textarea id="comenta" rows="2"></textarea></div>
 
-            <button class="btn-submit" id="btnSave" onclick="ejecutarGuardado()">Finalizar Registro</button>
+            <button class="btn-submit" id="btnSave" onclick="ejecutarGuardado()">Finalizar Registro e Insertar Folios</button>
         </div>
     </div>
 </div>
 
 <div id="modalSuccess" class="modal">
     <div class="modal-content">
-        <h3>¡Registro Exitoso!</h3>
-        <p id="resumenFolio"></p>
-        <button onclick="location.reload()">Nuevo Registro</button>
+        <h2 style="color: var(--success); margin-top: 0;">✓ ¡Registro Exitoso!</h2>
+        <div class="highlight-res" id="resumenFolio"></div>
+        <p style="font-size: 0.85rem; color: var(--text-light);">Los datos y los folios de salida han sido vinculados correctamente en la base de datos.</p>
+        <button onclick="location.reload()" style="padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Nuevo Registro</button>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    // Configuración de conexión
     const _supabase = supabase.createClient('https://zfztocmwphjfrabvbzlb.supabase.co', 'sb_publishable_cbOD6KTnjsGacu_GnAQm8g_nMuIoOIg');
     
-    let dataCache = [];
-    let currentCons = 1;
-    let currentFolio = 1;
+    let cacheEmisores = [];
+    let nextCons = 1;
+    let nextE = 1;
+    let nextS = 1;
 
-    // Ejecución inicial robusta
     window.onload = async () => {
-        const statusEl = document.getElementById('syncStatus');
-        statusEl.innerText = "Verificando conexión...";
-        console.log("Iniciando carga de sistema...");
-        
         try {
-            // Ejecutamos ambos en paralelo con lógica de diagnóstico
-            await Promise.all([
-                cargarCatalogos(),
-                consultarUltimosFolios()
-            ]);
-
+            await Promise.all([cargarCatalogos(), consultarUltimos()]);
             document.getElementById('loader').style.display = 'none';
         } catch (err) {
-            console.error("Error crítico de inicio:", err);
-            statusEl.innerText = "Error de Red";
-            statusEl.style.color = "red";
+            console.error("Error inicial:", err);
+            document.getElementById('syncStatus').innerText = "Error de Red";
         }
     };
 
     async function cargarCatalogos() {
+        const { data, error } = await _supabase.from('enlacesdirec').select('*').order('sujeto');
+        if (error) return;
+        cacheEmisores = data;
         const combo = document.getElementById('sigla_select');
-        const statusEl = document.getElementById('syncStatus');
-
-        try {
-            // Intento de lectura a la tabla enlacesdirec
-            const { data, error } = await _supabase
-                .from('enlacesdirec')
-                .select('sujeto, entidad, enlace, puesto')
-                .order('sujeto', { ascending: true });
-
-            if (error) {
-                console.error("Error Supabase Catálogo:", error);
-                combo.innerHTML = '<option value="">Error de Permisos (RLS)</option>';
-                statusEl.innerText = "🔒 Bloqueado por RLS";
-                statusEl.style.color = "orange";
-                return;
-            }
-
-            if (data && data.length > 0) {
-                dataCache = data;
-                combo.innerHTML = '<option value="">-- Seleccione Sujeto --</option>' + 
-                    data.map(i => `<option value="${i.sujeto}">${i.sujeto}</option>`).join('');
-                
-                console.log("Catálogo cargado:", data.length, "elementos.");
-                statusEl.innerText = "Conectado";
-                statusEl.style.color = "#22c55e";
-            } else {
-                combo.innerHTML = '<option value="">Tabla vacía en DB</option>';
-                statusEl.innerText = "Sin Datos";
-                statusEl.style.color = "var(--warning)";
-            }
-        } catch(e) {
-            console.error("Fallo inesperado en catálogo:", e);
-            combo.innerHTML = '<option value="">Error fatal</option>';
-        }
+        combo.innerHTML = '<option value="">-- Seleccione Sujeto --</option>' + 
+            data.map(i => `<option value="${i.sujeto}">${i.sujeto}</option>`).join('');
+        document.getElementById('syncStatus').innerText = "Conectado";
+        document.getElementById('syncStatus').style.color = "#22c55e";
     }
 
-    async function consultarUltimosFolios() {
-        try {
-            // USANDO 'ofa_e' en minúsculas para evitar el Error 400
-            const { data, error } = await _supabase
-                .from('correspondencias')
-                .select('conse_regis, ofa_e')
-                .order('conse_regis', { ascending: false })
-                .limit(1);
-
-            if (error) {
-                console.warn("No se pudo leer la tabla correspondencias (posiblemente vacía o RLS).");
-                throw error;
-            }
-
-            const registro = data?.[0] || null;
-            currentCons = (registro?.conse_regis || 0) + 1;
-            
-            let ultimoNum = 0;
-            if (registro?.ofa_e) {
-                const matches = registro.ofa_e.match(/\d+/);
-                ultimoNum = matches ? parseInt(matches[0]) : 0;
-            }
-            currentFolio = ultimoNum + 1;
-
-            actualizarInterfazFolios();
-        } catch (e) {
-            console.warn("Iniciando folios en 1 por defecto.");
-            actualizarInterfazFolios();
+    async function consultarUltimos() {
+        // Consultar último de correspondencias
+        const { data: cData } = await _supabase.from('correspondencias').select('conse_regis, ofa_e').order('conse_regis', { ascending: false }).limit(1);
+        if (cData?.[0]) {
+            nextCons = (cData[0].conse_regis || 0) + 1;
+            const matchE = cData[0].ofa_e.match(/\d+/);
+            nextE = matchE ? parseInt(matchE[0]) + 1 : 1;
         }
+
+        // Consultar último de folio_salida
+        const { data: sData } = await _supabase.from('folio_salida').select('ofa_s_folio').order('ofa_s_folio', { ascending: false }).limit(1);
+        if (sData?.[0]) {
+            const matchS = sData[0].ofa_s_folio.match(/\d+/);
+            nextS = matchS ? parseInt(matchS[0]) + 1 : 1;
+        }
+
+        actualizarUI();
     }
 
-    function actualizarInterfazFolios() {
-        const cStr = currentCons.toString().padStart(5, '0');
-        const fStr = `E-OFA-${currentFolio.toString().padStart(5, '0')}`;
-        
-        document.getElementById('cons').value = cStr;
-        document.getElementById('fe').value = fStr;
-        document.getElementById('dashCons').innerText = cStr;
-        document.getElementById('dashFolio').innerText = fStr;
+    function actualizarUI() {
+        const fe = `E-OFA-${nextE.toString().padStart(5, '0')}`;
+        document.getElementById('conse_regis').value = nextCons;
+        document.getElementById('ofa_e').value = fe;
+        document.getElementById('dashCons').innerText = nextCons.toString().padStart(5, '0');
+        document.getElementById('dashFolio').innerText = fe;
+        document.getElementById('dashSalida').innerText = `S-OFA-${nextS.toString().padStart(5, '0')}`;
+    }
+
+    function previewSalidas() {
+        const n = parseInt(document.getElementById('cant_salidas').value);
+        if (n === 0) { document.getElementById('ofa_s_view').value = ""; return; }
+        let list = [];
+        for(let i=0; i<n; i++) {
+            list.push(`S-OFA-${(nextS + i).toString().padStart(5, '0')}`);
+        }
+        document.getElementById('ofa_s_view').value = list.join(", ");
     }
 
     function autoCompletarEmisor(val) {
-        const item = dataCache.find(i => i.sujeto === val);
+        const item = cacheEmisores.find(i => i.sujeto === val);
         if(item) {
-            document.getElementById('dep').value = item.entidad || '';
-            document.getElementById('fir').value = item.enlace || '';
-            document.getElementById('car').value = item.puesto || '';
-        } else {
-            document.getElementById('dep').value = '';
-            document.getElementById('fir').value = '';
-            document.getElementById('car').value = '';
+            document.getElementById('entidad_dep').value = item.entidad || '';
+            document.getElementById('quien_firma').value = item.enlace || '';
+            document.getElementById('puesto_firma').value = item.puesto || '';
         }
     }
 
     async function ejecutarGuardado() {
         const btn = document.getElementById('btnSave');
-        const sigla = document.getElementById('sigla_select').value;
-        const asunto = document.getElementById('asunto').value.trim();
+        const asu = document.getElementById('asunto_firma').value.trim();
+        const cant = parseInt(document.getElementById('cant_salidas').value);
+        const folioE = document.getElementById('ofa_e').value;
 
-        if(!sigla || asunto.length < 21) {
-            return alert("Datos incompletos. El asunto debe tener al menos 21 caracteres.");
+        if(!document.getElementById('sigla_select').value || asu.length < 21) {
+            return alert("Revisa el emisor y que el asunto tenga más de 21 caracteres.");
         }
 
-        btn.disabled = true; 
-        btn.innerText = "Guardando...";
+        btn.disabled = true; btn.innerText = "Procesando...";
 
         try {
-            const folioFinal = `E-OFA-${currentFolio.toString().padStart(5, '0')}`;
-            const { error } = await _supabase.from('correspondencias').insert([{
-                conse_regis: currentCons,
-                ofa_e: folioFinal,
-                folio_inter: document.getElementById('f_int').value,
-                num_oficio_ingresar: document.getElementById('of_sol').value,
-                siglas_emis: sigla,
-                entidad_dep: document.getElementById('dep').value,
-                quien_firma: document.getElementById('fir').value,
-                puesto_firma: document.getElementById('car').value,
-                asunto_firma: asunto
-            }]);
+            // 1. Generar folios de salida
+            let fSalidas = [];
+            for(let i=0; i<cant; i++) { fSalidas.push(`S-OFA-${(nextS + i).toString().padStart(5, '0')}`); }
 
-            if(error) throw error;
-            
-            document.getElementById('resumenFolio').innerHTML = `Consecutivo: ${currentCons}<br>Folio: ${folioFinal}`;
+            // 2. Insertar en tabla principal
+            const { error: err1 } = await _supabase.from('correspondencias').insert([{
+                conse_regis: nextCons,
+                ofa_e: folioE,
+                ofa_s: fSalidas.join(", "),
+                folio_inter: document.getElementById('folio_inter').value,
+                medio_entrega: document.getElementById('medio_entrega').value,
+                tipo_dispo: document.getElementById('tipo_dispo').value,
+                cap_info: document.getElementById('cap_info').value,
+                uni_medi: document.getElementById('uni_medi').value,
+                siglas_emis: document.getElementById('sigla_select').value,
+                entidad_dep: document.getElementById('entidad_dep').value,
+                quien_firma: document.getElementById('quien_firma').value,
+                puesto_firma: document.getElementById('puesto_firma').value,
+                num_oficio_ingresar: document.getElementById('num_oficio_ingresar').value,
+                ofi_firmante: document.getElementById('ofi_firmante').value,
+                fecha_venci: document.getElementById('fecha_venci').value || null,
+                accion_realizar: document.getElementById('accion_realizar').value,
+                estatus: document.getElementById('estatus').value,
+                asunto_firma: asu,
+                comenta: document.getElementById('comenta').value,
+                fecha_ingreo_ofi: document.getElementById('fecha_ingreo_ofi').value || null
+            }]);
+            if(err1) throw err1;
+
+            // 3. Insertar registros en folio_salida vinculados a ofa_e
+            if(cant > 0) {
+                const inserts = fSalidas.map(s => ({ ofa_s_folio: s, ofa_e: folioE }));
+                const { error: err2 } = await _supabase.from('folio_salida').insert(inserts);
+                if(err2) throw err2;
+            }
+
+            document.getElementById('resumenFolio').innerHTML = `<b>Entrada:</b> ${folioE}<br><b>Salidas:</b> ${fSalidas.length > 0 ? fSalidas.join(", ") : 'Ninguna'}`;
             document.getElementById('modalSuccess').style.display = 'flex';
-        } catch(e) {
-            alert("Error al guardar: " + e.message);
-            btn.disabled = false;
-            btn.innerText = "Finalizar Registro";
+
+        } catch (e) {
+            alert("Error: " + e.message);
+            btn.disabled = false; btn.innerText = "Finalizar Registro";
         }
     }
 </script>
