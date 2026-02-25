@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Registro OFA | Maestro</title>
+    <title>Registro Maestro | YEPRI-INN METAX</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,75 +14,58 @@
         }
         body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding: 40px 20px; }
         .container { max-width: 1000px; margin: 0 auto; }
-        
-        /* Dashboard Mini */
         .dashboard-mini { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); border-top: 4px solid var(--primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .stat-label { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 5px; display: block; }
         .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-        
         .form-card { background: var(--card-bg); padding: 40px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         .form-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
         .section-header { grid-column: span 12; margin: 20px 0 10px; font-size: 0.9rem; font-weight: 600; color: var(--primary); text-transform: uppercase; border-left: 4px solid var(--primary); padding-left: 12px; }
-        
         .input-group { display: flex; flex-direction: column; gap: 6px; }
         .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } .span-8 { grid-column: span 8; } .span-12 { grid-column: span 12; }
-        
-        label { font-size: 0.8rem; font-weight: 500; }
-        input, select, textarea { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; background: var(--input-bg); }
-        input[readonly] { background: #f1f5f9; cursor: not-allowed; color: var(--primary); font-weight: 600; }
-        .req-border { border-left: 3px solid var(--danger); }
-        
-        .btn-submit { grid-column: span 12; margin-top: 30px; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-submit:hover { background: var(--primary-hover); }
-        .btn-submit:disabled { background: var(--text-light); }
-
+        input, select, textarea { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
+        input[readonly] { background: #f1f5f9; font-weight: 600; color: var(--primary); }
+        .btn-submit { grid-column: span 12; margin-top: 30px; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
         #loader { position: fixed; inset: 0; background: white; z-index: 50; display: flex; align-items: center; justify-content: center; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 30px; border-radius: 12px; width: 400px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="loader"><div class="spinner"></div></div>
+<div id="loader">Cargando Sistema...</div>
 
 <div class="container">
     <div class="dashboard-mini">
-        <div class="stat-card"><span class="stat-label">Consecutivo</span><div class="stat-value" id="dashCons">00000</div></div>
-        <div class="stat-card"><span class="stat-label">Folio Entrada</span><div class="stat-value" id="dashFolio">E-OFA-00000</div></div>
-        <div class="stat-card"><span class="stat-label">Estado DB</span><div class="stat-value" id="syncStatus">Conectando...</div></div>
+        <div class="stat-card"><span class="stat-label">Consecutivo</span><div class="stat-value" id="dashCons">00001</div></div>
+        <div class="stat-card"><span class="stat-label">Folio Entrada</span><div class="stat-value" id="dashFolio">E-OFA-00001</div></div>
+        <div class="stat-card"><span class="stat-label">Estado DB</span><div class="stat-value" id="syncStatus">Sincronizando...</div></div>
         <div class="stat-card"><span class="stat-label">Validación</span><div class="stat-value">Activa (21c)</div></div>
     </div>
 
     <div class="form-card">
-        <h2 style="margin-top:0">Registro de Correspondencia Maestro</h2>
         <div class="form-grid">
-            <div class="section-header">1. Datos de Control</div>
+            <div class="section-header">1. Control de Folios</div>
             <div class="input-group span-3"><label>Consecutivo</label><input type="text" id="cons" readonly></div>
             <div class="input-group span-3"><label>Folio Entrada</label><input type="text" id="fe" readonly></div>
-            <div class="input-group span-3"><label>Folio Interno CSF *</label><input type="text" id="f_int" class="req-border" placeholder="Ej: 001/2026"></div>
-            <div class="input-group span-3"><label>Oficio de Solicitud *</label><input type="text" id="of_sol" class="req-border"></div>
+            <div class="input-group span-3"><label>Folio Interno CSF</label><input type="text" id="f_int" placeholder="001/2026"></div>
+            <div class="input-group span-3"><label>Oficio Solicitud</label><input type="text" id="of_sol"></div>
 
-            <div class="section-header">2. Emisor (Autocompletado)</div>
+            <div class="section-header">2. Información del Emisor</div>
             <div class="input-group span-4">
-                <label>Siglas Sujeto *</label>
+                <label>Siglas Emisor (Sujeto) *</label>
                 <select id="sigla_select" onchange="autoCompletarEmisor(this.value)">
-                    <option value="">Cargando catálogo...</option>
+                    <option value="">-- Seleccione Sujeto --</option>
                 </select>
             </div>
             <div class="input-group span-8"><label>Dependencia / Ente</label><input type="text" id="dep" readonly></div>
-            <div class="input-group span-4"><label>Nombre Firmante</label><input type="text" id="fir" readonly></div>
+            <div class="input-group span-4"><label>Nombre del Firmante</label><input type="text" id="fir" readonly></div>
             <div class="input-group span-4"><label>Cargo</label><input type="text" id="car" readonly></div>
-            <div class="input-group span-4"><label>Estatus</label><select id="estatus"><option>Pendiente</option><option>En Proceso</option></select></div>
+            <div class="input-group span-4"><label>Estatus</label><select id="estatus"><option>Pendiente</option></select></div>
 
-            <div class="section-header">3. Detalles y Asunto</div>
+            <div class="section-header">3. Extracto del Documento</div>
             <div class="input-group span-12">
-                <label>Asunto (Mínimo 21 caracteres) *</label>
-                <textarea id="asunto" rows="3"></textarea>
-                <small id="charCount" style="color:var(--danger)">Caracteres: 0 / 21</small>
+                <textarea id="asunto" rows="3" placeholder="Mínimo 21 caracteres"></textarea>
             </div>
 
             <button class="btn-submit" id="btnSave" onclick="ejecutarGuardado()">Finalizar Registro</button>
@@ -93,9 +75,9 @@
 
 <div id="modalSuccess" class="modal">
     <div class="modal-content">
-        <h3 style="color:var(--success)">¡Registro Exitoso!</h3>
+        <h3>¡Registro Exitoso!</h3>
         <p id="resumenFolio"></p>
-        <button onclick="location.reload()" style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer">Aceptar</button>
+        <button onclick="location.reload()">Nuevo Registro</button>
     </div>
 </div>
 
@@ -103,17 +85,25 @@
 <script>
     const _supabase = supabase.createClient('https://zfztocmwphjfrabvbzlb.supabase.co', 'sb_publishable_cbOD6KTnjsGacu_GnAQm8g_nMuIoOIg');
     let dataCache = [];
-    let currentConsNum = 0;
-    let currentFolioNum = 0;
+    let currentCons = 1;
+    let currentFolio = 1;
 
+    // Ejecución inicial robusta
     window.onload = async () => {
-        await cargarCatalogos();
-        await consultarUltimosFolios();
+        console.log("Iniciando carga de sistema...");
+        
+        // Ejecutamos ambos en paralelo, pero capturamos errores individualmente
+        // para que si uno falla, el otro NO se detenga.
+        await Promise.all([
+            cargarCatalogos().catch(e => console.error("Fallo catálogo:", e)),
+            consultarUltimosFolios().catch(e => console.error("Fallo folios:", e))
+        ]);
+
         document.getElementById('loader').style.display = 'none';
     };
 
-    // 1. CARGA DE CATÁLOGO (CORREGIDO)
     async function cargarCatalogos() {
+        const combo = document.getElementById('sigla_select');
         try {
             const { data, error } = await _supabase
                 .from('enlacesdirec')
@@ -121,23 +111,28 @@
                 .order('sujeto', { ascending: true });
 
             if (error) throw error;
-            dataCache = data || [];
-            const combo = document.getElementById('sigla_select');
-            combo.innerHTML = '<option value="">-- Seleccione Sujeto --</option>' + 
-                dataCache.map(i => `<option value="${i.sujeto}">${i.sujeto}</option>`).join('');
-            
-            document.getElementById('syncStatus').innerText = "Conectado";
-            document.getElementById('syncStatus').style.color = "var(--success)";
+
+            if (data && data.length > 0) {
+                dataCache = data;
+                combo.innerHTML = '<option value="">-- Seleccione Sujeto --</option>' + 
+                    data.map(i => `<option value="${i.sujeto}">${i.sujeto}</option>`).join('');
+                console.log("Catálogo cargado:", data.length, "elementos.");
+                document.getElementById('syncStatus').innerText = "Conectado";
+                document.getElementById('syncStatus').style.color = "#22c55e";
+            } else {
+                combo.innerHTML = '<option value="">Sin datos en DB</option>';
+            }
         } catch(e) {
-            console.error("Error catálogo:", e.message);
-            document.getElementById('syncStatus').innerText = "Error RLS/Auth";
-            document.getElementById('syncStatus').style.color = "var(--danger)";
+            console.error("Error detallado Catálogo:", e);
+            combo.innerHTML = '<option value="">Error al cargar (Ver RLS)</option>';
+            document.getElementById('syncStatus').innerText = "Error RLS";
+            document.getElementById('syncStatus').style.color = "#ef4444";
         }
     }
 
-    // 2. CONSULTA DE FOLIOS (CORREGIDO OFA_E -> ofa_e)
     async function consultarUltimosFolios() {
         try {
+            // USANDO 'ofa_e' en minúsculas para evitar el Error 400
             const { data, error } = await _supabase
                 .from('correspondencias')
                 .select('conse_regis, ofa_e')
@@ -147,27 +142,30 @@
             if (error) throw error;
 
             const registro = data?.[0] || null;
-            currentConsNum = (registro?.conse_regis || 0) + 1;
+            currentCons = (registro?.conse_regis || 0) + 1;
             
-            let ultimoFolioBase = 0;
+            let ultimoFolioNum = 0;
             if (registro?.ofa_e) {
                 const matches = registro.ofa_e.match(/\d+/);
-                ultimoFolioBase = matches ? parseInt(matches[0]) : 0;
+                ultimoFolioNum = matches ? parseInt(matches[0]) : 0;
             }
-            currentFolioNum = ultimoFolioBase + 1;
+            currentFolio = ultimoFolioNum + 1;
 
-            // Formato Visual
-            const cStr = currentConsNum.toString().padStart(5, '0');
-            const fStr = `E-OFA-${currentFolioNum.toString().padStart(5, '0')}`;
-
-            document.getElementById('cons').value = cStr;
-            document.getElementById('fe').value = fStr;
-            document.getElementById('dashCons').innerText = cStr;
-            document.getElementById('dashFolio').innerText = fStr;
-
+            actualizarInterfazFolios();
         } catch (e) {
-            console.error("Error Folios:", e.message);
+            console.warn("No hay registros previos o error en tabla correspondencias. Iniciando en 1.");
+            actualizarInterfazFolios();
         }
+    }
+
+    function actualizarInterfazFolios() {
+        const cStr = currentCons.toString().padStart(5, '0');
+        const fStr = `E-OFA-${currentFolio.toString().padStart(5, '0')}`;
+        
+        document.getElementById('cons').value = cStr;
+        document.getElementById('fe').value = fStr;
+        document.getElementById('dashCons').innerText = cStr;
+        document.getElementById('dashFolio').innerText = fStr;
     }
 
     function autoCompletarEmisor(val) {
@@ -179,48 +177,34 @@
         }
     }
 
-    document.getElementById('asunto').addEventListener('input', function() {
-        const len = this.value.trim().length;
-        const info = document.getElementById('charCount');
-        info.innerText = `Caracteres: ${len} / 21`;
-        info.style.color = len >= 21 ? 'var(--success)' : 'var(--danger)';
-    });
-
     async function ejecutarGuardado() {
         const btn = document.getElementById('btnSave');
-        const f_int = document.getElementById('f_int').value.trim();
-        const of_sol = document.getElementById('of_sol').value.trim();
+        const sigla = document.getElementById('sigla_select').value;
         const asunto = document.getElementById('asunto').value.trim();
 
-        if(!f_int || !of_sol || asunto.length < 21 || !document.getElementById('sigla_select').value) {
-            return alert("⚠️ Revisa los campos obligatorios.");
-        }
+        if(!sigla || asunto.length < 21) return alert("Datos incompletos.");
 
-        btn.disabled = true;
-        btn.innerText = "Guardando...";
+        btn.disabled = true; btn.innerText = "Guardando...";
 
         try {
-            const folioFinal = `E-OFA-${currentFolioNum.toString().padStart(5, '0')}`;
+            const folioFinal = `E-OFA-${currentFolio.toString().padStart(5, '0')}`;
             const { error } = await _supabase.from('correspondencias').insert([{
-                conse_regis: currentConsNum,
+                conse_regis: currentCons,
                 ofa_e: folioFinal,
-                folio_inter: f_int,
-                num_oficio_ingresar: of_sol,
-                siglas_emis: document.getElementById('sigla_select').value,
+                folio_inter: document.getElementById('f_int').value,
+                num_oficio_ingresar: document.getElementById('of_sol').value,
+                siglas_emis: sigla,
                 entidad_dep: document.getElementById('dep').value,
                 quien_firma: document.getElementById('fir').value,
                 puesto_firma: document.getElementById('car').value,
-                estatus: document.getElementById('estatus').value,
                 asunto_firma: asunto
             }]);
 
             if(error) throw error;
-            document.getElementById('resumenFolio').innerHTML = `Consecutivo: ${currentConsNum}<br>Folio: ${folioFinal}`;
             document.getElementById('modalSuccess').style.display = 'flex';
         } catch(e) {
             alert("Error: " + e.message);
             btn.disabled = false;
-            btn.innerText = "Reintentar";
         }
     }
 </script>
