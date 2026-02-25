@@ -104,15 +104,23 @@
                     <option value="Otro">🛠️ Otro (Especificar)</option>
                 </select>
             </div>
-            <div class="input-group span-3"><label>🛠️ 🟠 Especificar Disp.</label><input type="text" id="otro_dispo" disabled></div>
-            <div class="input-group span-3"><label>📅 🟠 Fecha Vencimiento</label><input type="date" id="fecha_venci"></div>
-
+            <div class="input-group span-3"><label>🛠️ 🟠 Capacidad con información.</label><input type="text" id="cap_info" disabled></div>
+             </div>
             <div class="section-header">3. Información del Emisor</div>
             <div class="input-group span-4"><label>🏢🟠 Siglas Emisor *</label><select id="sigla_select" onchange="autoCompletarEmisor(this.value)"></select></div>
             <div class="input-group span-8"><label>🏛️🟠 Dependencia / Ente</label><input type="text" id="entidad_dep" readonly></div>
             <div class="input-group span-4"><label>👤🟠 Nombre Firmante</label><input type="text" id="quien_firma" readonly></div>
             <div class="input-group span-8"><label>💼🟠 Cargo</label><input type="text" id="puesto_firma" readonly></div>
-
+             <div class="input-group span-3">
+                <label>⚡🟠 Unidad de medida </label>
+                <select id="uni_medi">
+                    <option value="KB">KB</option>
+                    <option value=MB">MB</option>
+                    <option value="GB">GB</option>
+                    <option value="TB">TB</option>
+                </select>
+            </div>
+            
             <div class="section-header">4. Extracto y Gestión</div>
             <div class="input-group span-3">
                 <label class="label-green">📤🟢 Generar Salidas (0-100)</label>
@@ -126,6 +134,8 @@
                 <label class="label-red">📥🟠 Acción a Realizar</label>
                 <input type="text" id="accion_realizar" class="highlight-red">
             </div>
+              <div class="input-group span-3"><label>📅 🟠 Fecha Vencimiento</label><input type="date" id="fecha_venci"></div>
+             </div>
             <div class="input-group span-3">
                 <label>⚡🟠 Estatus</label>
                 <select id="estatus">
